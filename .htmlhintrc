@@ -1,0 +1,8 @@
+{
+  "doctype-first": true,
+  "title-require": true,
+  "attr-lowercase": true,
+  "tagname-lowercase": true,
+  "id-class-value": false,
+  "spec-char-escape": false
+}

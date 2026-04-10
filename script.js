@@ -31,8 +31,12 @@ startButton.addEventListener("click", startPuzzle);
 hintButton.addEventListener("click", toggleHint);
 orderButton.addEventListener("click", orderPieces);
 shuffleButton.addEventListener("click", shufflePieces);
-piecesXInput.addEventListener("input", () => normalizePiecesInputs(piecesXInput, piecesYInput));
-piecesYInput.addEventListener("input", () => normalizePiecesInputs(piecesYInput, piecesXInput));
+piecesXInput.addEventListener("input", () =>
+  normalizePiecesInputs(piecesXInput, piecesYInput),
+);
+piecesYInput.addEventListener("input", () =>
+  normalizePiecesInputs(piecesYInput, piecesXInput),
+);
 closeModal.addEventListener("click", () => {
   winModal.hidden = true;
 });
@@ -71,7 +75,8 @@ function startPuzzle() {
   }
 
   if (!window.headbreaker) {
-    statusOutput.textContent = "Библиотека headbreaker не загрузилась. Проверьте доступ к интернету и обновите страницу.";
+    statusOutput.textContent =
+      "Библиотека headbreaker не загрузилась. Проверьте доступ к интернету и обновите страницу.";
     return;
   }
 
@@ -91,7 +96,11 @@ function startPuzzle() {
     x: puzzleRect.width / cols,
     y: puzzleRect.height / rows,
   };
-  normalizedImage = createNormalizedImage(loadedImage, puzzleRect.width, puzzleRect.height);
+  normalizedImage = createNormalizedImage(
+    loadedImage,
+    puzzleRect.width,
+    puzzleRect.height,
+  );
   const borderFill = {
     x: Math.max(4, pieceSize.x * 0.08),
     y: Math.max(4, pieceSize.y * 0.08),
@@ -146,8 +155,12 @@ function startPuzzle() {
   puzzleCanvas.puzzle.translate(puzzleRect.left, puzzleRect.top);
   puzzleCanvas.refill();
   disableImageRepeat();
-  puzzleCanvas.puzzle.attachHorizontalConnectionRequirement(areOriginalHorizontalNeighbors);
-  puzzleCanvas.puzzle.attachVerticalConnectionRequirement(areOriginalVerticalNeighbors);
+  puzzleCanvas.puzzle.attachHorizontalConnectionRequirement(
+    areOriginalHorizontalNeighbors,
+  );
+  puzzleCanvas.puzzle.attachVerticalConnectionRequirement(
+    areOriginalVerticalNeighbors,
+  );
   puzzleCanvas.attachSolvedValidator();
   puzzleCanvas.shuffle(0.8);
   puzzleCanvas.draw();
@@ -157,11 +170,14 @@ function startPuzzle() {
   puzzleCanvas.onValid(checkWin);
 
   startTimer();
-  statusOutput.textContent = "Пазл готов. Перетаскивайте кусочки и соединяйте соседние.";
+  statusOutput.textContent =
+    "Пазл готов. Перетаскивайте кусочки и соединяйте соседние.";
 }
 
 function calculateBoardSize() {
-  const toolbarHeight = document.querySelector(".toolbar").getBoundingClientRect().height;
+  const toolbarHeight = document
+    .querySelector(".toolbar")
+    .getBoundingClientRect().height;
   return {
     width: Math.max(300, window.innerWidth - 32),
     height: Math.max(260, window.innerHeight - toolbarHeight - 32),
@@ -263,14 +279,18 @@ function createPieceMetadata(cols, rows) {
 }
 
 function areOriginalHorizontalNeighbors(firstPiece, secondPiece) {
-  const colDistance = Math.abs(firstPiece.metadata.col - secondPiece.metadata.col);
+  const colDistance = Math.abs(
+    firstPiece.metadata.col - secondPiece.metadata.col,
+  );
   const isSameRow = firstPiece.metadata.row === secondPiece.metadata.row;
 
   return isSameRow && colDistance === 1;
 }
 
 function areOriginalVerticalNeighbors(firstPiece, secondPiece) {
-  const rowDistance = Math.abs(firstPiece.metadata.row - secondPiece.metadata.row);
+  const rowDistance = Math.abs(
+    firstPiece.metadata.row - secondPiece.metadata.row,
+  );
   const isSameColumn = firstPiece.metadata.col === secondPiece.metadata.col;
 
   return isSameColumn && rowDistance === 1;
@@ -345,7 +365,9 @@ function setHintVisible(isVisible) {
   board.classList.toggle("showHint", isHintVisible);
   hintButton.classList.toggle("isActive", isHintVisible);
   hintButton.setAttribute("aria-pressed", String(isHintVisible));
-  hintButton.textContent = isHintVisible ? "Скрыть подсказку" : "Показать подсказку";
+  hintButton.textContent = isHintVisible
+    ? "Скрыть подсказку"
+    : "Показать подсказку";
 }
 
 function checkWin() {
@@ -441,9 +463,20 @@ function clampNumber(value, min, max) {
   return Math.min(max, Math.max(min, number));
 }
 
-function normalizePiecesInputs(changedInput = piecesXInput, pairedInput = piecesYInput) {
-  const changedValue = clampNumber(changedInput.value, minPiecesPerSide, maxPiecesPerSide);
-  let pairedValue = clampNumber(pairedInput.value, minPiecesPerSide, maxPiecesPerSide);
+function normalizePiecesInputs(
+  changedInput = piecesXInput,
+  pairedInput = piecesYInput,
+) {
+  const changedValue = clampNumber(
+    changedInput.value,
+    minPiecesPerSide,
+    maxPiecesPerSide,
+  );
+  let pairedValue = clampNumber(
+    pairedInput.value,
+    minPiecesPerSide,
+    maxPiecesPerSide,
+  );
   const maxPairedValue = Math.max(
     minPiecesPerSide,
     Math.floor(maxPiecesTotal / changedValue),
