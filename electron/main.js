@@ -1,5 +1,11 @@
 const path = require("node:path");
-const { app, BrowserWindow, shell } = require("electron");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
+const {
+  clearScores,
+  exportScores,
+  getScores,
+  saveScore,
+} = require("./database.js");
 
 function createMainWindow() {
   const mainWindow = new BrowserWindow({
@@ -10,6 +16,7 @@ function createMainWindow() {
     backgroundColor: "#f4f7f8",
     autoHideMenuBar: true,
     webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
       nodeIntegration: false,
       sandbox: true,
@@ -23,6 +30,27 @@ function createMainWindow() {
     return { action: "deny" };
   });
 }
+
+ipcMain.handle("app:close", () => {
+  app.quit();
+});
+
+ipcMain.handle("scores:save", (_, score) => {
+  return saveScore(score);
+});
+
+ipcMain.handle("scores:list", (_, limit, sortMode) => {
+  return getScores(limit, sortMode);
+});
+
+ipcMain.handle("scores:clear", () => {
+  clearScores();
+  return true;
+});
+
+ipcMain.handle("scores:export", (_, sortMode) => {
+  return exportScores(sortMode);
+});
 
 app.whenReady().then(() => {
   createMainWindow();

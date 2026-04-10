@@ -5,15 +5,17 @@
   "main": "electron/main.js",
   "private": true,
   "scripts": {
-    "start": "electron .",
-    "dist": "electron-builder --win --x64",
-    "pack": "electron-builder --win --x64 --dir",
+    "build": "node scripts/build.js",
+    "dev": "node scripts/dev-server.js",
+    "start": "npm run build && electron .",
+    "dist": "npm run build && electron-builder --win --x64",
+    "pack": "npm run build && electron-builder --win --x64 --dir",
     "prepare": "husky",
-    "format": "prettier --write \"*.{html,css,js,json,md}\" \"electron/**/*.js\" \"scripts/**/*.js\"",
-    "format:check": "prettier --check \"*.{html,css,js,json,md}\" \"electron/**/*.js\" \"scripts/**/*.js\"",
-    "lint:js": "eslint script.js electron/main.js scripts/**/*.js",
+    "format": "prettier --write \"*.{html,js,json,md}\" \"electron/**/*.js\" \"scripts/**/*.js\" \"src/**/*.js\" \"src/**/*.scss\"",
+    "format:check": "prettier --check \"*.{html,js,json,md}\" \"electron/**/*.js\" \"scripts/**/*.js\" \"src/**/*.js\" \"src/**/*.scss\"",
+    "lint:js": "eslint electron/main.js scripts/**/*.js src/**/*.js",
     "lint:html": "htmlhint index.html",
-    "lint:css": "stylelint styles.css",
+    "lint:css": "stylelint \"src/**/*.scss\"",
     "lint": "npm run lint:js && npm run lint:html && npm run lint:css",
     "build:check": "node scripts/verify-build.js",
     "verify": "npm run format:check && npm run lint && npm audit && npm run build:check"
@@ -22,11 +24,13 @@
     "@eslint/js": "^10.0.1",
     "electron": "^41.2.0",
     "electron-builder": "^26.0.12",
+    "esbuild": "^0.28.0",
     "eslint": "^10.2.0",
     "globals": "^17.4.0",
     "htmlhint": "^1.9.2",
     "husky": "^9.1.7",
     "prettier": "^3.8.2",
+    "sass": "^1.99.0",
     "stylelint": "^17.6.0",
     "stylelint-config-standard": "^40.0.0"
   },
@@ -38,8 +42,7 @@
     },
     "files": [
       "index.html",
-      "styles.css",
-      "script.js",
+      "dist-app/**/*",
       "vendor/**/*",
       "electron/**/*",
       "scripts/**/*"
@@ -64,5 +67,8 @@
       "oneClick": false,
       "allowToChangeInstallationDirectory": true
     }
+  },
+  "dependencies": {
+    "sql.js": "^1.14.1"
   }
 }

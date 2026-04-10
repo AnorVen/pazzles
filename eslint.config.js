@@ -3,14 +3,20 @@ const globals = require("globals");
 
 module.exports = [
   {
-    ignores: ["node_modules/**", "dist*/**", ".build-checks/**", "vendor/**"],
+    ignores: [
+      "node_modules/**",
+      "dist*/**",
+      "dist-app/**",
+      ".build-checks/**",
+      "vendor/**",
+    ],
   },
   js.configs.recommended,
   {
-    files: ["script.js"],
+    files: ["src/**/*.js"],
     languageOptions: {
       ecmaVersion: 2022,
-      sourceType: "script",
+      sourceType: "module",
       globals: {
         ...globals.browser,
         headbreaker: "readonly",

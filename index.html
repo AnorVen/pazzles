@@ -4,54 +4,223 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HTML пазл</title>
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="dist-app/styles.css" />
   </head>
   <body>
-    <main class="app">
-      <section class="toolbar" aria-label="Настройки пазла">
-        <div class="upload">
-          <label class="fileButton" for="imageInput">Загрузить картинку</label>
-          <input id="imageInput" type="file" accept="image/*" />
-          <span id="fileName" class="fileName">Картинка не выбрана</span>
+    <main class="shell">
+      <section
+        id="menuPage"
+        class="page page--active menuPage"
+        aria-label="Главное меню"
+      >
+        <div class="menuPanel">
+          <p class="eyebrow">HTML Puzzle</p>
+          <h1>Собирайте пазлы и сохраняйте лучшие результаты</h1>
+          <div class="menuActions">
+            <button id="newGameButton" type="button">Новая игра</button>
+            <button id="openSettingsButton" type="button">Настройки</button>
+            <button id="openLeadersButton" type="button">Лидеры</button>
+            <button id="exitButton" class="secondaryButton" type="button">
+              Выход
+            </button>
+          </div>
+          <p id="menuHint" class="menuHint">
+            Выберите картинку и настройте размер пазла перед стартом.
+          </p>
         </div>
-
-        <label class="field">
-          <span>Кусочков по X</span>
-          <input id="piecesX" type="number" min="1" max="5000" value="4" />
-        </label>
-
-        <label class="field">
-          <span>Кусочков по Y</span>
-          <input id="piecesY" type="number" min="1" max="5000" value="3" />
-        </label>
-
-        <button
-          id="hintButton"
-          class="hintButton"
-          type="button"
-          aria-pressed="false"
-        >
-          Показать подсказку
-        </button>
-
-        <button id="orderButton" type="button">Упорядочить</button>
-
-        <button id="shuffleButton" type="button">Перемешать</button>
-
-        <button id="startButton" type="button">Собрать пазл</button>
-
-        <div class="timer" aria-live="polite">
-          Время: <span id="timer">00:00</span>
-        </div>
-
-        <div id="status" class="status" aria-live="polite"></div>
       </section>
 
-      <section class="workspace" aria-label="Область сборки">
-        <div id="board" class="board">
-          <div class="emptyState">
-            Загрузите картинку и нажмите «Собрать пазл»
+      <section id="settingsPage" class="page" aria-label="Настройки" hidden>
+        <div class="contentPage">
+          <header class="pageHeader">
+            <button id="settingsBackButton" class="ghostButton" type="button">
+              Назад
+            </button>
+            <div>
+              <p class="eyebrow">Настройки</p>
+              <h2>Параметры новой игры</h2>
+            </div>
+          </header>
+
+          <div class="settingsPanel">
+            <div class="upload">
+              <label class="fileButton" for="imageInput"
+                >Загрузить картинку</label
+              >
+              <input id="imageInput" type="file" accept="image/*" />
+              <span id="fileName" class="fileName">Картинка не выбрана</span>
+            </div>
+
+            <div class="fieldGrid">
+              <label class="field">
+                <span>Кусочков по X</span>
+                <input
+                  id="piecesX"
+                  type="number"
+                  min="1"
+                  max="5000"
+                  value="4"
+                />
+              </label>
+
+              <label class="field">
+                <span>Кусочков по Y</span>
+                <input
+                  id="piecesY"
+                  type="number"
+                  min="1"
+                  max="5000"
+                  value="3"
+                />
+              </label>
+            </div>
+
+            <div class="settingsMeta">
+              <div class="metaItem">
+                <span>Всего элементов</span>
+                <strong id="totalPieces">12</strong>
+              </div>
+            </div>
+
+            <div class="settingsActions">
+              <button
+                id="saveSettingsButton"
+                class="secondaryButton"
+                type="button"
+              >
+                Сохранить настройки
+              </button>
+              <button id="startButton" type="button">Начать игру</button>
+            </div>
+
+            <div id="settingsStatus" class="status" aria-live="polite"></div>
           </div>
+        </div>
+      </section>
+
+      <section id="leadersPage" class="page" aria-label="Лидеры" hidden>
+        <div class="contentPage">
+          <header class="pageHeader">
+            <button id="leadersBackButton" class="ghostButton" type="button">
+              Назад
+            </button>
+            <div>
+              <p class="eyebrow">Лидеры</p>
+              <h2>Лучшие результаты</h2>
+            </div>
+          </header>
+
+          <div class="leadersPanel">
+            <div class="leadersActions">
+              <label class="selectField" for="leadersSort">
+                <span>Сортировка</span>
+                <select id="leadersSort">
+                  <option value="difficulty">Сначала сложные</option>
+                  <option value="time">Сначала быстрое время</option>
+                  <option value="newest">Сначала новые</option>
+                  <option value="oldest">Сначала старые</option>
+                  <option value="file">По имени файла</option>
+                </select>
+              </label>
+              <button
+                id="refreshLeadersButton"
+                class="secondaryButton"
+                type="button"
+              >
+                Обновить
+              </button>
+              <button
+                id="exportLeadersButton"
+                class="secondaryButton"
+                type="button"
+              >
+                Экспорт CSV
+              </button>
+              <button
+                id="clearLeadersButton"
+                class="secondaryButton"
+                type="button"
+              >
+                Очистить базу
+              </button>
+            </div>
+
+            <div class="leadersTableWrap">
+              <table class="leadersTable">
+                <thead>
+                  <tr>
+                    <th>Когда</th>
+                    <th>Кусочки</th>
+                    <th>Время</th>
+                    <th>Файл</th>
+                  </tr>
+                </thead>
+                <tbody id="leadersBody">
+                  <tr>
+                    <td colspan="4">Результатов пока нет.</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div id="leadersStatus" class="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="gamePage" class="page gamePage" aria-label="Игра" hidden>
+        <div class="app">
+          <section class="gameToolbar" aria-label="Управление пазлом">
+            <div class="toolbarCluster">
+              <button id="menuButton" class="secondaryButton" type="button">
+                Меню
+              </button>
+              <button
+                id="gameSettingsButton"
+                class="secondaryButton"
+                type="button"
+              >
+                Настройки
+              </button>
+            </div>
+
+            <div class="toolbarCluster toolbarCluster--main">
+              <div class="currentFile">
+                <span class="currentFileLabel">Файл</span>
+                <strong id="gameFileName">Картинка не выбрана</strong>
+              </div>
+            </div>
+
+            <div class="toolbarCluster">
+              <button
+                id="hintButton"
+                class="hintButton secondaryButton"
+                type="button"
+                aria-pressed="false"
+              >
+                Показать подсказку
+              </button>
+              <button id="orderButton" class="secondaryButton" type="button">
+                Упорядочить
+              </button>
+              <button id="shuffleButton" class="secondaryButton" type="button">
+                Перемешать
+              </button>
+              <div class="timer" aria-live="polite">
+                Время: <span id="timer">00:00</span>
+              </div>
+            </div>
+
+            <div id="status" class="status" aria-live="polite"></div>
+          </section>
+
+          <section class="workspace" aria-label="Область сборки">
+            <div id="board" class="board">
+              <div class="emptyState">
+                Перейдите в настройки, выберите картинку и начните новую игру.
+              </div>
+            </div>
+          </section>
         </div>
       </section>
     </main>
@@ -63,13 +232,20 @@
         aria-modal="true"
         aria-labelledby="winTitle"
       >
-        <h2 id="winTitle">вы выиграли</h2>
+        <h2 id="winTitle">Вы выиграли</h2>
         <p>Время сборки: <strong id="winTime">00:00</strong></p>
-        <button id="closeModal" type="button">Закрыть</button>
+        <div class="modalActions">
+          <button id="closeModal" class="secondaryButton" type="button">
+            Закрыть
+          </button>
+          <button id="openLeadersFromModal" type="button">
+            Открыть лидеров
+          </button>
+        </div>
       </div>
     </div>
 
     <script src="vendor/headbreaker.js"></script>
-    <script src="script.js"></script>
+    <script src="dist-app/app.js"></script>
   </body>
 </html>

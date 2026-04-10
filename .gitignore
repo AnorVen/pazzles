@@ -1,5 +1,31 @@
 node_modules/
 dist/
 dist-*/
+dist-app/
 .build-checks/
 *.log
+
+# IDE и редакторы
+.idea/
+.vscode/
+*.code-workspace
+*.sublime-project
+*.sublime-workspace
+.project
+.classpath
+.settings/
+
+# ОС и временные файлы
+.DS_Store
+Thumbs.db
+desktop.ini
+*.swp
+*.swo
+*~
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
