@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HTML пазл</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <section class="toolbar" aria-label="Настройки пазла">
+        <div class="upload">
+          <label class="fileButton" for="imageInput">Загрузить картинку</label>
+          <input id="imageInput" type="file" accept="image/*" />
+          <span id="fileName" class="fileName">Картинка не выбрана</span>
+        </div>
+
+        <label class="field">
+          <span>Кусочков по X</span>
+          <input id="piecesX" type="number" min="1" max="5000" value="4" />
+        </label>
+
+        <label class="field">
+          <span>Кусочков по Y</span>
+          <input id="piecesY" type="number" min="1" max="5000" value="3" />
+        </label>
+
+        <button id="hintButton" class="hintButton" type="button" aria-pressed="false">
+          Показать подсказку
+        </button>
+
+        <button id="orderButton" type="button">Упорядочить</button>
+
+        <button id="shuffleButton" type="button">Перемешать</button>
+
+        <button id="startButton" type="button">Собрать пазл</button>
+
+        <div class="timer" aria-live="polite">
+          Время: <span id="timer">00:00</span>
+        </div>
+
+        <div id="status" class="status" aria-live="polite"></div>
+      </section>
+
+      <section class="workspace" aria-label="Область сборки">
+        <div id="board" class="board">
+          <div class="emptyState">
+            Загрузите картинку и нажмите «Собрать пазл»
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <div id="winModal" class="modal" hidden>
+      <div class="modalPanel" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+        <h2 id="winTitle">вы выиграли</h2>
+        <p>Время сборки: <strong id="winTime">00:00</strong></p>
+        <button id="closeModal" type="button">Закрыть</button>
+      </div>
+    </div>
+
+    <script src="vendor/headbreaker.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
