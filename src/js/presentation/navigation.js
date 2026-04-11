@@ -1,9 +1,18 @@
-import { gamePage, leadersPage, menuPage, settingsPage } from "./dom.js";
+import {
+  aboutPage,
+  gamePage,
+  howToPlayPage,
+  leadersPage,
+  menuPage,
+  settingsPage,
+} from "./dom.js";
 
 const pages = {
   menu: menuPage,
   settings: settingsPage,
   leaders: leadersPage,
+  howToPlay: howToPlayPage,
+  about: aboutPage,
   game: gamePage,
 };
 

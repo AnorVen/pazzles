@@ -1,5 +1,11 @@
-import { getScoresFromDesktop, saveScoreToDesktop } from "./app-api.js";
-import { clearScoresInDesktop, exportScoresFromDesktop } from "./app-api.js";
+import {
+  getScoresFromDesktop,
+  saveScoreToDesktop,
+} from "../platform/app-api.js";
+import {
+  clearScoresInDesktop,
+  exportScoresFromDesktop,
+} from "../platform/app-api.js";
 import {
   clearScoresWithSqlJs,
   exportScoresWithSqlJs,

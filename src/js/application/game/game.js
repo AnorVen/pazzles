@@ -6,22 +6,41 @@ import {
   statusOutput,
   winModal,
   winTime,
-} from "./dom.js";
-import { minPiecesTotal } from "./constants.js";
-import { normalizePiecesInputs } from "./inputs.js";
+} from "../../presentation/dom.js";
+import { minPiecesTotal } from "../../domain/settings/constants.js";
+import {
+  buildWinPayload,
+  initializeGameplaySession,
+  recordGameplayAction,
+  updateGameplayHud,
+} from "./gameplay-stats.js";
 import {
   applyBoardSize,
   calculateBoardSize,
   calculatePuzzleRect,
   createNormalizedImage,
-} from "./layout.js";
+} from "../../infrastructure/layout/layout.js";
+import {
+  getCurrentMode,
+  getNormalizedPiecesFromInputs,
+} from "../settings/settings.js";
 import {
   configurePuzzleCanvas,
   createHeadbreakerCanvas,
-} from "./puzzle-runtime.js";
-import { saveWinResult } from "./results.js";
-import { formatTime, getElapsedTime, startTimer, stopTimer } from "./timer.js";
-import { createHintLayer, resetBoard, setHintVisible } from "./view.js";
+} from "../../infrastructure/puzzle/puzzle-runtime.js";
+import { saveWinResult } from "../results/results.js";
+import {
+  formatTime,
+  getElapsedTime,
+  startTimer,
+  stopTimer,
+} from "../../shared/time/timer.js";
+import {
+  createHintLayer,
+  resetBoard,
+  setHintVisible,
+  toggleHint,
+} from "../../presentation/view.js";
 
 let imageUrl = "";
 let loadedImage = null;
@@ -29,6 +48,7 @@ let normalizedImage = null;
 let puzzleCanvas = null;
 let isWon = false;
 let currentFileName = "Картинка не выбрана";
+let hudTimerId = null;
 
 export function getLoadedImage() {
   return loadedImage;
@@ -80,7 +100,7 @@ export function startPuzzle() {
     return;
   }
 
-  const { cols, rows } = normalizePiecesInputs();
+  const { cols, rows } = getNormalizedPiecesFromInputs();
 
   if (cols * rows < minPiecesTotal) {
     settingsStatusOutput.textContent =
@@ -98,12 +118,20 @@ export function startPuzzle() {
     x: puzzleRect.width / cols,
     y: puzzleRect.height / rows,
   };
+  const mode = getCurrentMode();
 
   stopTimer();
+  stopHudLoop();
   resetBoard();
   setHintVisible(false);
   applyBoardSize(board, boardSize, puzzleRect);
   gameFileName.textContent = currentFileName;
+  initializeGameplaySession({
+    cols,
+    rows,
+    fileName: currentFileName,
+    mode,
+  });
 
   normalizedImage = createNormalizedImage(loadedImage, boardSize, puzzleRect);
 
@@ -126,8 +154,27 @@ export function startPuzzle() {
 
   isWon = false;
   startTimer();
+  startHudLoop();
+  updateGameplayHud(puzzleCanvas, 0);
   statusOutput.textContent =
-    "Пазл готов. Перетаскивайте кусочки и соединяйте соседние.";
+    "Партия началась. Собирайте фрагменты и следите за темпом.";
+}
+
+export function toggleHintVisibility() {
+  if (!loadedImage) {
+    statusOutput.textContent = "Сначала загрузите картинку.";
+    return;
+  }
+
+  const wasVisible = board.classList.contains("showHint");
+
+  toggleHint(loadedImage, statusOutput);
+
+  if (!wasVisible && board.classList.contains("showHint")) {
+    recordGameplayAction("hint");
+    refreshHud();
+    statusOutput.textContent = "Подсказка включена.";
+  }
 }
 
 export function orderPieces() {
@@ -143,7 +190,9 @@ export function orderPieces() {
   });
   puzzleCanvas.redraw();
   isWon = false;
-  statusOutput.textContent = "Кусочки упорядочены.";
+  recordGameplayAction("order");
+  refreshHud();
+  statusOutput.textContent = "Кусочки разложены по местам.";
 }
 
 export function shufflePieces() {
@@ -155,6 +204,8 @@ export function shufflePieces() {
   puzzleCanvas.shuffle(0.9);
   puzzleCanvas.redraw();
   isWon = false;
+  recordGameplayAction("shuffle");
+  refreshHud();
   statusOutput.textContent = "Кусочки перемешаны.";
 }
 
@@ -174,19 +225,38 @@ function checkWin() {
 
   isWon = true;
   stopTimer();
+  stopHudLoop();
   const elapsedMilliseconds = getElapsedTime();
   const elapsedLabel = formatTime(elapsedMilliseconds);
-  const { cols, rows } = normalizePiecesInputs();
-
-  winTime.textContent = elapsedLabel;
-  winModal.hidden = false;
-  void saveWinResult({
-    playedAt: Date.now(),
-    cols,
-    rows,
-    totalPieces: cols * rows,
+  const winPayload = buildWinPayload({
     elapsedMs: elapsedMilliseconds,
     elapsedLabel,
     fileName: currentFileName,
   });
+
+  winTime.textContent = elapsedLabel;
+  winModal.hidden = false;
+  void saveWinResult(winPayload);
+}
+
+function refreshHud() {
+  if (!puzzleCanvas) {
+    return;
+  }
+
+  updateGameplayHud(puzzleCanvas, getElapsedTime());
+}
+
+function startHudLoop() {
+  stopHudLoop();
+  hudTimerId = window.setInterval(() => {
+    refreshHud();
+  }, 300);
+}
+
+function stopHudLoop() {
+  if (hudTimerId) {
+    window.clearInterval(hudTimerId);
+    hudTimerId = null;
+  }
 }

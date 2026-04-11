@@ -1,5 +1,10 @@
 import { leadersBody, leadersSortSelect, leadersStatusOutput } from "./dom.js";
-import { clearScores, exportScores, getScores } from "./score-db.js";
+import { getGameMode } from "../domain/game/game-modes.js";
+import {
+  clearScores,
+  exportScores,
+  getScores,
+} from "../infrastructure/persistence/score-db.js";
 
 export async function renderLeaders() {
   leadersStatusOutput.textContent = "Загружаю результаты...";
@@ -9,7 +14,7 @@ export async function renderLeaders() {
 
     if (!scores.length) {
       leadersBody.innerHTML =
-        '<tr><td colspan="4">Результатов пока нет.</td></tr>';
+        '<tr><td colspan="6">Результатов пока нет.</td></tr>';
       leadersStatusOutput.textContent = "Список лидеров пуст.";
       return;
     }
@@ -19,8 +24,10 @@ export async function renderLeaders() {
         (score) => `
           <tr>
             <td>${formatPlayedAt(score.playedAt)}</td>
+            <td>${getGameMode(score.mode).label}</td>
             <td>${score.cols} × ${score.rows} (${score.totalPieces})</td>
             <td>${score.elapsedLabel}</td>
+            <td>${formatScore(score.score)}</td>
             <td title="${escapeHtml(score.fileName)}">${escapeHtml(score.fileName)}</td>
           </tr>
         `,
@@ -29,7 +36,7 @@ export async function renderLeaders() {
     leadersStatusOutput.textContent = `Показано результатов: ${scores.length}.`;
   } catch {
     leadersBody.innerHTML =
-      '<tr><td colspan="4">Не удалось загрузить результаты.</td></tr>';
+      '<tr><td colspan="6">Не удалось загрузить результаты.</td></tr>';
     leadersStatusOutput.textContent = "Не удалось загрузить результаты.";
   }
 }
@@ -40,7 +47,7 @@ export async function clearLeaders() {
   try {
     await clearScores();
     leadersBody.innerHTML =
-      '<tr><td colspan="4">Результатов пока нет.</td></tr>';
+      '<tr><td colspan="6">Результатов пока нет.</td></tr>';
     leadersStatusOutput.textContent = "Таблица лидеров очищена.";
   } catch {
     leadersStatusOutput.textContent = "Не удалось очистить базу результатов.";
@@ -69,6 +76,10 @@ function formatPlayedAt(timestamp) {
     dateStyle: "short",
     timeStyle: "short",
   }).format(new Date(timestamp));
+}
+
+function formatScore(score) {
+  return new Intl.NumberFormat("ru-RU").format(score);
 }
 
 function escapeHtml(value) {

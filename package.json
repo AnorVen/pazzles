@@ -2,6 +2,7 @@
   "name": "html-puzzle",
   "version": "0.1.0",
   "description": "HTML puzzle desktop app",
+  "author": "AnorVen",
   "main": "electron/main.js",
   "private": true,
   "scripts": {
@@ -37,6 +38,7 @@
   "build": {
     "appId": "local.html-puzzle",
     "productName": "HTML Puzzle",
+    "icon": "build/icon.png",
     "directories": {
       "output": "dist"
     },

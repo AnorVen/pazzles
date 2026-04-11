@@ -16,7 +16,7 @@ function buildProject() {
   fs.writeFileSync(path.join(outputDirectory, "styles.css"), styles.css);
 
   esbuild.buildSync({
-    entryPoints: ["src/js/main.js"],
+    entryPoints: ["src/js/app/main.js"],
     bundle: true,
     outfile: path.join(outputDirectory, "app.js"),
     format: "iife",

@@ -2,8 +2,9 @@ import initSqlJs from "sql.js";
 
 const databaseStorageKey = "html-puzzle-sqljs-db";
 const orderByMap = {
-  difficulty: "total_pieces DESC, elapsed_ms ASC, played_at DESC",
-  time: "elapsed_ms ASC, total_pieces DESC, played_at DESC",
+  difficulty: "total_pieces DESC, score DESC, elapsed_ms ASC, played_at DESC",
+  score: "score DESC, total_pieces DESC, elapsed_ms ASC, played_at DESC",
+  time: "elapsed_ms ASC, total_pieces DESC, score DESC, played_at DESC",
   newest: "played_at DESC",
   oldest: "played_at ASC",
   file: "file_name COLLATE NOCASE ASC, played_at DESC",
@@ -22,8 +23,10 @@ export async function saveScoreWithSqlJs(score) {
       total_pieces,
       elapsed_ms,
       elapsed_label,
-      file_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      file_name,
+      mode,
+      score
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   statement.run([
@@ -34,6 +37,8 @@ export async function saveScoreWithSqlJs(score) {
     score.elapsedMs,
     score.elapsedLabel,
     score.fileName,
+    score.mode || "calm",
+    score.score || 0,
   ]);
   statement.free();
   persistDatabase(db);
@@ -55,7 +60,9 @@ export async function getScoresWithSqlJs(limit = 50, sortMode = "difficulty") {
       total_pieces AS totalPieces,
       elapsed_ms AS elapsedMs,
       elapsed_label AS elapsedLabel,
-      file_name AS fileName
+      file_name AS fileName,
+      mode,
+      score
     FROM scores
     ORDER BY ${orderByClause}
     LIMIT ?
@@ -128,6 +135,8 @@ async function getDatabase() {
       file_name TEXT NOT NULL
     )
   `);
+  ensureColumn(database, "mode", "TEXT NOT NULL DEFAULT 'calm'");
+  ensureColumn(database, "score", "INTEGER NOT NULL DEFAULT 0");
 
   return database;
 }
@@ -140,6 +149,17 @@ function getSqlJs() {
   }
 
   return sqlJsPromise;
+}
+
+function ensureColumn(db, columnName, definition) {
+  const pragma = db.exec("PRAGMA table_info(scores)");
+  const rows = pragma[0]?.values || [];
+  const hasColumn = rows.some((row) => row[1] === columnName);
+
+  if (!hasColumn) {
+    db.exec(`ALTER TABLE scores ADD COLUMN ${columnName} ${definition}`);
+    persistDatabase(db);
+  }
 }
 
 function persistDatabase(db) {
@@ -172,21 +192,25 @@ function base64ToUint8Array(value) {
 function createCsv(rows) {
   const header = [
     "playedAt",
+    "mode",
     "cols",
     "rows",
     "totalPieces",
     "elapsedMs",
     "elapsedLabel",
+    "score",
     "fileName",
   ];
   const body = rows.map((row) =>
     [
       row.playedAt,
+      row.mode,
       row.cols,
       row.rows,
       row.totalPieces,
       row.elapsedMs,
       row.elapsedLabel,
+      row.score,
       row.fileName,
     ]
       .map(escapeCsvValue)

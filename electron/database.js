@@ -14,8 +14,10 @@ function saveScore(score) {
       total_pieces,
       elapsed_ms,
       elapsed_label,
-      file_name
-    ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      file_name,
+      mode,
+      score
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
   `);
 
   const result = statement.run(
@@ -26,6 +28,8 @@ function saveScore(score) {
     score.elapsedMs,
     score.elapsedLabel,
     score.fileName,
+    score.mode || "calm",
+    score.score || 0,
   );
 
   return Number(result.lastInsertRowid);
@@ -41,7 +45,9 @@ function getScores(limit = 50, sortMode = "difficulty") {
       total_pieces AS totalPieces,
       elapsed_ms AS elapsedMs,
       elapsed_label AS elapsedLabel,
-      file_name AS fileName
+      file_name AS fileName,
+      mode,
+      score
     FROM scores
     ORDER BY ${getOrderByClause(sortMode)}
     LIMIT ?
@@ -92,6 +98,8 @@ function getDatabase() {
       file_name TEXT NOT NULL
     )
   `);
+  ensureColumn(database, "mode", "TEXT NOT NULL DEFAULT 'calm'");
+  ensureColumn(database, "score", "INTEGER NOT NULL DEFAULT 0");
 
   return database;
 }
@@ -104,10 +112,24 @@ function getDatabasePath() {
   return path.join(userDataDirectory, "scores.sqlite");
 }
 
+function ensureColumn(currentDatabase, columnName, definition) {
+  const columns = currentDatabase
+    .prepare("PRAGMA table_info(scores)")
+    .all()
+    .map((column) => column.name);
+
+  if (!columns.includes(columnName)) {
+    currentDatabase.exec(
+      `ALTER TABLE scores ADD COLUMN ${columnName} ${definition}`,
+    );
+  }
+}
+
 function getOrderByClause(sortMode) {
   const orderByMap = {
-    difficulty: "total_pieces DESC, elapsed_ms ASC, played_at DESC",
-    time: "elapsed_ms ASC, total_pieces DESC, played_at DESC",
+    difficulty: "total_pieces DESC, score DESC, elapsed_ms ASC, played_at DESC",
+    score: "score DESC, total_pieces DESC, elapsed_ms ASC, played_at DESC",
+    time: "elapsed_ms ASC, total_pieces DESC, score DESC, played_at DESC",
     newest: "played_at DESC",
     oldest: "played_at ASC",
     file: "file_name COLLATE NOCASE ASC, played_at DESC",
@@ -142,21 +164,25 @@ async function chooseExportPath() {
 function createCsv(rows) {
   const header = [
     "playedAt",
+    "mode",
     "cols",
     "rows",
     "totalPieces",
     "elapsedMs",
     "elapsedLabel",
+    "score",
     "fileName",
   ];
   const body = rows.map((row) =>
     [
       row.playedAt,
+      row.mode,
       row.cols,
       row.rows,
       row.totalPieces,
       row.elapsedMs,
       row.elapsedLabel,
+      row.score,
       row.fileName,
     ]
       .map(escapeCsvValue)

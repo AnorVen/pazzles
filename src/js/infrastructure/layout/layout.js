@@ -1,10 +1,20 @@
 export function calculateBoardSize() {
   const toolbar = document.querySelector(".gameToolbar");
+  const workspace = document.querySelector(".workspace");
   const toolbarHeight = toolbar ? toolbar.getBoundingClientRect().height : 96;
+  const workspaceRect = workspace?.getBoundingClientRect();
+  const width = workspaceRect
+    ? Math.floor(workspaceRect.width)
+    : Math.max(300, window.innerWidth - 32);
+  const height = workspaceRect
+    ? Math.floor(
+        workspaceRect.height || window.innerHeight - toolbarHeight - 32,
+      )
+    : Math.max(260, window.innerHeight - toolbarHeight - 32);
 
   return {
-    width: Math.max(300, window.innerWidth - 32),
-    height: Math.max(260, window.innerHeight - toolbarHeight - 32),
+    width: Math.max(300, width),
+    height: Math.max(260, height),
   };
 }
 

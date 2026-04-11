@@ -1,4 +1,4 @@
-import { timerOutput } from "./dom.js";
+import { timerOutput } from "../../presentation/dom.js";
 
 let timerId = null;
 let startTime = 0;

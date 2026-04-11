@@ -14,16 +14,61 @@
         aria-label="Главное меню"
       >
         <div class="menuPanel">
-          <p class="eyebrow">HTML Puzzle</p>
-          <h1>Собирайте пазлы и сохраняйте лучшие результаты</h1>
+          <div class="menuHero">
+            <div class="menuIntro">
+              <p class="eyebrow">HTML Puzzle</p>
+              <h1>Тихая мастерская для красивых и сложных пазлов</h1>
+              <p class="heroText">
+                Загружайте свои снимки, выбирайте темп игры и собирайте пазл в
+                спокойном режиме или в соревновательном испытании.
+              </p>
+            </div>
+
+            <div class="menuPreviewCard">
+              <span class="previewLabel">Ритм игры</span>
+              <strong>Спокойно, красиво, с памятью о лучших партиях</strong>
+              <ul class="menuFeatureList">
+                <li>Свой снимок и гибкая сетка деталей</li>
+                <li>Подсказка, прогресс и текущий счёт</li>
+                <li>Локальная таблица лидеров и экспорт CSV</li>
+              </ul>
+            </div>
+          </div>
+
           <div class="menuActions">
             <button id="newGameButton" type="button">Новая игра</button>
             <button id="openSettingsButton" type="button">Настройки</button>
             <button id="openLeadersButton" type="button">Лидеры</button>
+            <button
+              id="openHowToPlayButton"
+              class="secondaryButton"
+              type="button"
+            >
+              Как играть
+            </button>
+            <button id="openAboutButton" class="secondaryButton" type="button">
+              О проекте
+            </button>
             <button id="exitButton" class="secondaryButton" type="button">
               Выход
             </button>
           </div>
+
+          <div class="menuStats">
+            <div class="menuStat">
+              <span>Режимы</span>
+              <strong>2</strong>
+            </div>
+            <div class="menuStat">
+              <span>Максимум деталей</span>
+              <strong>5000</strong>
+            </div>
+            <div class="menuStat">
+              <span>Локальная база</span>
+              <strong>SQLite</strong>
+            </div>
+          </div>
+
           <p id="menuHint" class="menuHint">
             Выберите картинку и настройте размер пазла перед стартом.
           </p>
@@ -38,47 +83,87 @@
             </button>
             <div>
               <p class="eyebrow">Настройки</p>
-              <h2>Параметры новой игры</h2>
+              <h2>Подготовка новой партии</h2>
             </div>
           </header>
 
           <div class="settingsPanel">
-            <div class="upload">
-              <label class="fileButton" for="imageInput"
-                >Загрузить картинку</label
-              >
-              <input id="imageInput" type="file" accept="image/*" />
-              <span id="fileName" class="fileName">Картинка не выбрана</span>
-            </div>
+            <div class="settingsColumns">
+              <div class="settingsBlock">
+                <div class="upload">
+                  <label class="fileButton" for="imageInput"
+                    >Загрузить картинку</label
+                  >
+                  <input id="imageInput" type="file" accept="image/*" />
+                  <span id="fileName" class="fileName"
+                    >Картинка не выбрана</span
+                  >
+                </div>
 
-            <div class="fieldGrid">
-              <label class="field">
-                <span>Кусочков по X</span>
-                <input
-                  id="piecesX"
-                  type="number"
-                  min="1"
-                  max="5000"
-                  value="4"
-                />
-              </label>
+                <div class="fieldGrid">
+                  <label class="field">
+                    <span>Кусочков по X</span>
+                    <input
+                      id="piecesX"
+                      type="number"
+                      min="1"
+                      max="5000"
+                      value="4"
+                    />
+                  </label>
 
-              <label class="field">
-                <span>Кусочков по Y</span>
-                <input
-                  id="piecesY"
-                  type="number"
-                  min="1"
-                  max="5000"
-                  value="3"
-                />
-              </label>
+                  <label class="field">
+                    <span>Кусочков по Y</span>
+                    <input
+                      id="piecesY"
+                      type="number"
+                      min="1"
+                      max="5000"
+                      value="3"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div class="settingsBlock">
+                <div class="modeSection">
+                  <div class="sectionLabel">Режим партии</div>
+
+                  <label class="modeCard">
+                    <input type="radio" name="gameMode" value="calm" checked />
+                    <span class="modeCardBody">
+                      <strong>Спокойный</strong>
+                      <small>
+                        Мягкий темп, лёгкие штрафы и дружелюбный счёт.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
+                    <input type="radio" name="gameMode" value="challenge" />
+                    <span class="modeCardBody">
+                      <strong>Испытание</strong>
+                      <small>
+                        Больше очков за сложность, но помощь стоит дороже.
+                      </small>
+                    </span>
+                  </label>
+                </div>
+              </div>
             </div>
 
             <div class="settingsMeta">
               <div class="metaItem">
                 <span>Всего элементов</span>
                 <strong id="totalPieces">12</strong>
+              </div>
+              <div class="metaItem">
+                <span>Стиль партии</span>
+                <strong id="selectedModeLabel">Спокойный</strong>
+              </div>
+              <div class="metaItem">
+                <span>Подсказка</span>
+                <strong>По кнопке во время игры</strong>
               </div>
             </div>
 
@@ -106,7 +191,7 @@
             </button>
             <div>
               <p class="eyebrow">Лидеры</p>
-              <h2>Лучшие результаты</h2>
+              <h2>Лучшие партии</h2>
             </div>
           </header>
 
@@ -116,6 +201,7 @@
                 <span>Сортировка</span>
                 <select id="leadersSort">
                   <option value="difficulty">Сначала сложные</option>
+                  <option value="score">Сначала высокий счёт</option>
                   <option value="time">Сначала быстрое время</option>
                   <option value="newest">Сначала новые</option>
                   <option value="oldest">Сначала старые</option>
@@ -150,14 +236,16 @@
                 <thead>
                   <tr>
                     <th>Когда</th>
+                    <th>Режим</th>
                     <th>Кусочки</th>
                     <th>Время</th>
+                    <th>Счёт</th>
                     <th>Файл</th>
                   </tr>
                 </thead>
                 <tbody id="leadersBody">
                   <tr>
-                    <td colspan="4">Результатов пока нет.</td>
+                    <td colspan="6">Результатов пока нет.</td>
                   </tr>
                 </tbody>
               </table>
@@ -168,8 +256,91 @@
         </div>
       </section>
 
+      <section id="howToPlayPage" class="page" aria-label="Как играть" hidden>
+        <div class="contentPage">
+          <header class="pageHeader">
+            <button id="howToPlayBackButton" class="ghostButton" type="button">
+              Назад
+            </button>
+            <div>
+              <p class="eyebrow">Маршрут партии</p>
+              <h2 id="howToPlayTitle">Как играть</h2>
+            </div>
+          </header>
+
+          <div class="infoPanel">
+            <p id="howToPlayIntro" class="infoLead">
+              Краткая инструкция по запуску и сборке пазла.
+            </p>
+
+            <div id="howToPlaySteps" class="infoGrid"></div>
+
+            <div class="infoAside">
+              <div class="infoCard">
+                <span class="sectionLabel">Быстрый старт</span>
+                <p id="howToPlayQuickStart" class="heroText">
+                  Откройте настройки, загрузите картинку и начните партию.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="aboutPage" class="page" aria-label="О проекте" hidden>
+        <div class="contentPage">
+          <header class="pageHeader">
+            <button id="aboutBackButton" class="ghostButton" type="button">
+              Назад
+            </button>
+            <div>
+              <p class="eyebrow">О проекте</p>
+              <h2 id="aboutTitle">Зачем нужен этот пазл</h2>
+            </div>
+          </header>
+
+          <div class="infoPanel">
+            <p id="aboutLead" class="infoLead">
+              Краткое описание идеи приложения и его атмосферы.
+            </p>
+
+            <div class="infoGrid infoGrid--twoColumns">
+              <article class="infoCard">
+                <span class="sectionLabel">Идея</span>
+                <p id="aboutIdea" class="heroText">
+                  Приложение соединяет спокойную сборку и локальную историю
+                  результатов.
+                </p>
+              </article>
+
+              <article class="infoCard">
+                <span class="sectionLabel">Для кого</span>
+                <p id="aboutAudience" class="heroText">
+                  Для игроков, которым нравится собственный темп и аккуратный
+                  интерфейс.
+                </p>
+              </article>
+
+              <article class="infoCard">
+                <span class="sectionLabel">Особенности</span>
+                <ul id="aboutHighlights" class="menuFeatureList">
+                  <li>Загрузка своих изображений</li>
+                </ul>
+              </article>
+
+              <article class="infoCard">
+                <span class="sectionLabel">Обещание</span>
+                <p id="aboutPromise" class="heroText">
+                  Пазл остаётся понятным, но даёт простор для сложных партий.
+                </p>
+              </article>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="gamePage" class="page gamePage" aria-label="Игра" hidden>
-        <div class="app">
+        <div class="app app--game">
           <section class="gameToolbar" aria-label="Управление пазлом">
             <div class="toolbarCluster">
               <button id="menuButton" class="secondaryButton" type="button">
@@ -186,7 +357,7 @@
 
             <div class="toolbarCluster toolbarCluster--main">
               <div class="currentFile">
-                <span class="currentFileLabel">Файл</span>
+                <span class="currentFileLabel">Текущая партия</span>
                 <strong id="gameFileName">Картинка не выбрана</strong>
               </div>
             </div>
@@ -206,20 +377,80 @@
               <button id="shuffleButton" class="secondaryButton" type="button">
                 Перемешать
               </button>
-              <div class="timer" aria-live="polite">
-                Время: <span id="timer">00:00</span>
-              </div>
             </div>
-
-            <div id="status" class="status" aria-live="polite"></div>
           </section>
 
-          <section class="workspace" aria-label="Область сборки">
-            <div id="board" class="board">
-              <div class="emptyState">
-                Перейдите в настройки, выберите картинку и начните новую игру.
+          <section class="gameStage">
+            <aside class="gameHud" aria-label="Состояние партии">
+              <div class="hudCard hudCard--accent">
+                <span class="hudLabel">Режим</span>
+                <strong id="gameModeBadge">Спокойный</strong>
+                <p id="gameGoalText" class="hudText">
+                  Собирайте в удобном темпе и держите красивый ритм партии.
+                </p>
               </div>
-            </div>
+
+              <div class="hudCard">
+                <div class="hudHeader">
+                  <span class="hudLabel">Прогресс</span>
+                  <strong id="progressPercent">0%</strong>
+                </div>
+                <div class="progressBar" aria-hidden="true">
+                  <span id="progressFill" class="progressFill"></span>
+                </div>
+                <div class="hudMetrics">
+                  <div class="hudMetric">
+                    <span>На месте</span>
+                    <strong id="placedPiecesValue">0 / 0</strong>
+                  </div>
+                  <div class="hudMetric">
+                    <span>Связки</span>
+                    <strong id="groupsValue">0</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hudCard">
+                <div class="hudHeader">
+                  <span class="hudLabel">Счёт партии</span>
+                  <strong id="scoreValue">0</strong>
+                </div>
+                <p id="scoreHint" class="hudText">
+                  Чем меньше помощи и чем быстрее сборка, тем выше итог.
+                </p>
+                <div class="hudMetrics">
+                  <div class="hudMetric">
+                    <span>Время</span>
+                    <strong id="timer">00:00</strong>
+                  </div>
+                  <div class="hudMetric">
+                    <span>Детали</span>
+                    <strong id="piecesSummary">0</strong>
+                  </div>
+                </div>
+              </div>
+
+              <div class="hudCard">
+                <span class="hudLabel">Совет</span>
+                <p class="hudText">
+                  Начните с узнаваемых фрагментов или соберите края, а потом
+                  подводите группы друг к другу.
+                </p>
+              </div>
+            </aside>
+
+            <section class="workspace" aria-label="Область сборки">
+              <div id="board" class="board">
+                <div class="emptyState">
+                  Перейдите в настройки, выберите картинку и начните новую игру.
+                </div>
+              </div>
+              <div
+                id="status"
+                class="status status--overlay"
+                aria-live="polite"
+              ></div>
+            </section>
           </section>
         </div>
       </section>
@@ -227,13 +458,37 @@
 
     <div id="winModal" class="modal" hidden>
       <div
-        class="modalPanel"
+        class="modalPanel modalPanel--win"
         role="dialog"
         aria-modal="true"
         aria-labelledby="winTitle"
       >
+        <p class="eyebrow">Партия завершена</p>
         <h2 id="winTitle">Вы выиграли</h2>
-        <p>Время сборки: <strong id="winTime">00:00</strong></p>
+
+        <div class="winSummary">
+          <div class="winStat">
+            <span>Время</span>
+            <strong id="winTime">00:00</strong>
+          </div>
+          <div class="winStat">
+            <span>Счёт</span>
+            <strong id="winScore">0</strong>
+          </div>
+          <div class="winStat">
+            <span>Режим</span>
+            <strong id="winMode">Спокойный</strong>
+          </div>
+          <div class="winStat">
+            <span>Кусочки</span>
+            <strong id="winPieces">0</strong>
+          </div>
+        </div>
+
+        <p id="winMessage" class="winMessage">
+          Красивый темп. Результат уже отправлен в таблицу лидеров.
+        </p>
+
         <div class="modalActions">
           <button id="closeModal" class="secondaryButton" type="button">
             Закрыть

@@ -1,6 +1,6 @@
-import { leadersStatusOutput, statusOutput } from "./dom.js";
-import { renderLeaders } from "./leaders.js";
-import { saveScore } from "./score-db.js";
+import { leadersStatusOutput, statusOutput } from "../../presentation/dom.js";
+import { renderLeaders } from "../../presentation/leaders.js";
+import { saveScore } from "../../infrastructure/persistence/score-db.js";
 
 export async function saveWinResult(result) {
   try {
