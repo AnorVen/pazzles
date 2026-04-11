@@ -1,3 +1,5 @@
+import { getImageAspectRatioValue } from "../../domain/settings/image-aspect-ratios.js";
+
 const imagePool = [];
 let preparedImageId = "";
 
@@ -7,7 +9,6 @@ const imagePoolStorageKey = "image-pool";
 const maxImageSide = 2048;
 const maxImagePixels = 3_145_728;
 const jpegQuality = 0.88;
-const targetAspectRatio = 16 / 9;
 const supportedMimeTypes = new Set([
   "image/jpeg",
   "image/png",
@@ -33,17 +34,12 @@ export async function restoreImagePool() {
         id: entry.id,
         name: entry.name,
         src: entry.src,
+        originalSrc:
+          typeof entry.originalSrc === "string" ? entry.originalSrc : "",
       });
     });
 
-    preparedImageId =
-      typeof parsedValue?.preparedImageId === "string"
-        ? parsedValue.preparedImageId
-        : "";
-
-    if (!imagePool.some((entry) => entry.id === preparedImageId)) {
-      preparedImageId = imagePool[0]?.id || "";
-    }
+    preparedImageId = imagePool[0]?.id || "";
 
     return {
       restored: imagePool.length,
@@ -58,7 +54,7 @@ export async function restoreImagePool() {
   }
 }
 
-export async function addImagesToPool(files) {
+export async function addImagesToPool(files, aspectRatioId) {
   const allFiles = Array.from(files);
   const fileList = allFiles.filter(isSupportedImageFile);
   const rejected = allFiles.length - fileList.length;
@@ -72,11 +68,7 @@ export async function addImagesToPool(files) {
   }
 
   const preparedEntries = await Promise.all(
-    fileList.map(async (file) => ({
-      id: createImageId(file),
-      name: file.name,
-      src: await normalizeImageForPuzzle(file),
-    })),
+    fileList.map(async (file) => createPreparedPoolEntry(file, aspectRatioId)),
   );
   let added = 0;
 
@@ -108,6 +100,45 @@ export async function clearImagePool() {
   await persistImagePool();
 }
 
+export async function repreparePoolForAspectRatio(aspectRatioId) {
+  if (!imagePool.length) {
+    return {
+      updated: 0,
+      fromOriginal: 0,
+      fallbackUpdated: 0,
+    };
+  }
+
+  let fromOriginal = 0;
+  let fallbackUpdated = 0;
+
+  for (const entry of imagePool) {
+    const sourceUrl = entry.originalSrc || entry.src;
+    const nextImage = await normalizeImageForPuzzleFromSource(
+      sourceUrl,
+      aspectRatioId,
+    );
+
+    entry.src = nextImage;
+
+    if (!entry.originalSrc) {
+      entry.originalSrc = sourceUrl;
+      fallbackUpdated += 1;
+      continue;
+    }
+
+    fromOriginal += 1;
+  }
+
+  await persistImagePool();
+
+  return {
+    updated: imagePool.length,
+    fromOriginal,
+    fallbackUpdated,
+  };
+}
+
 export function hasImagesInPool() {
   return imagePool.length > 0;
 }
@@ -136,17 +167,53 @@ export function prepareRandomImage({ avoidImageId = "" } = {}) {
     return null;
   }
 
-  const availableEntries =
-    imagePool.length > 1 && avoidImageId
-      ? imagePool.filter((entry) => entry.id !== avoidImageId)
-      : imagePool;
-  const nextEntry =
-    availableEntries[Math.floor(Math.random() * availableEntries.length)] ||
-    imagePool[0];
+  const nextEntry = getNextQueueEntry(avoidImageId);
 
+  moveEntryToFront(nextEntry.id);
   preparedImageId = nextEntry.id;
   void persistImagePool();
-  return nextEntry;
+  return imagePool[0];
+}
+
+export async function reorderPoolEntries(
+  draggedImageId,
+  targetImageId,
+  targetPosition = "before",
+) {
+  if (!draggedImageId || !targetImageId || draggedImageId === targetImageId) {
+    return false;
+  }
+
+  const draggedIndex = imagePool.findIndex(
+    (entry) => entry.id === draggedImageId,
+  );
+  const targetIndex = imagePool.findIndex(
+    (entry) => entry.id === targetImageId,
+  );
+
+  if (draggedIndex < 0 || targetIndex < 0) {
+    return false;
+  }
+
+  const [draggedEntry] = imagePool.splice(draggedIndex, 1);
+  let nextTargetIndex = imagePool.findIndex(
+    (entry) => entry.id === targetImageId,
+  );
+
+  if (nextTargetIndex < 0) {
+    imagePool.splice(draggedIndex, 0, draggedEntry);
+    return false;
+  }
+
+  if (targetPosition === "after") {
+    nextTargetIndex += 1;
+  }
+
+  imagePool.splice(nextTargetIndex, 0, draggedEntry);
+  preparedImageId = imagePool[0]?.id || "";
+  await persistImagePool();
+
+  return true;
 }
 
 function createImageId(file) {
@@ -167,15 +234,44 @@ function readFileAsDataUrl(file) {
   });
 }
 
-async function normalizeImageForPuzzle(file) {
+async function normalizeImageForPuzzle(file, aspectRatioId) {
   const sourceUrl = await readFileAsDataUrl(file);
+  const originalSrc = await normalizeOriginalImageSource(sourceUrl);
+  const src = await normalizeImageForPuzzleFromSource(
+    originalSrc,
+    aspectRatioId,
+  );
+
+  return {
+    originalSrc,
+    src,
+  };
+}
+
+async function createPreparedPoolEntry(file, aspectRatioId) {
+  const preparedImage = await normalizeImageForPuzzle(file, aspectRatioId);
+
+  return {
+    id: createImageId(file),
+    name: file.name,
+    src: preparedImage.src,
+    originalSrc: preparedImage.originalSrc,
+  };
+}
+
+async function normalizeImageForPuzzleFromSource(sourceUrl, aspectRatioId) {
   const image = await loadImage(sourceUrl);
+  const aspectRatio = getImageAspectRatioValue(aspectRatioId);
   const cropRect = calculateCropRect(
     image.naturalWidth,
     image.naturalHeight,
-    targetAspectRatio,
+    aspectRatio,
   );
-  const targetSize = calculateNormalizedSize(cropRect.width, cropRect.height);
+  const targetSize = calculateNormalizedAspectSize(
+    cropRect.width,
+    cropRect.height,
+    aspectRatio,
+  );
   const canvas = document.createElement("canvas");
   const context = canvas.getContext("2d");
 
@@ -200,7 +296,36 @@ async function normalizeImageForPuzzle(file) {
     canvas.height,
   );
 
-  return canvas.toDataURL(getOutputMimeType(file.type), jpegQuality);
+  return canvas.toDataURL(
+    getOutputMimeTypeFromSourceUrl(sourceUrl),
+    jpegQuality,
+  );
+}
+
+async function normalizeOriginalImageSource(sourceUrl) {
+  const image = await loadImage(sourceUrl);
+  const targetSize = calculateNormalizedSize(
+    image.naturalWidth,
+    image.naturalHeight,
+  );
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    throw new Error("Не удалось подготовить исходное изображение для пула.");
+  }
+
+  canvas.width = targetSize.width;
+  canvas.height = targetSize.height;
+  context.imageSmoothingEnabled = true;
+  context.imageSmoothingQuality = "high";
+  context.clearRect(0, 0, canvas.width, canvas.height);
+  context.drawImage(image, 0, 0, canvas.width, canvas.height);
+
+  return canvas.toDataURL(
+    getOutputMimeTypeFromSourceUrl(sourceUrl),
+    jpegQuality,
+  );
 }
 
 function calculateCropRect(width, height, aspectRatio) {
@@ -254,6 +379,36 @@ function calculateNormalizedSize(width, height) {
   };
 }
 
+function calculateNormalizedAspectSize(width, height, aspectRatio) {
+  const normalizedSource = calculateNormalizedSize(width, height);
+  let targetWidth = normalizedSource.width;
+  let targetHeight = Math.max(1, Math.round(targetWidth / aspectRatio));
+
+  if (targetHeight > normalizedSource.height) {
+    targetHeight = normalizedSource.height;
+    targetWidth = Math.max(1, Math.round(targetHeight * aspectRatio));
+  }
+
+  if (targetWidth > maxImageSide) {
+    targetWidth = maxImageSide;
+    targetHeight = Math.max(1, Math.round(targetWidth / aspectRatio));
+  }
+
+  if (targetWidth * targetHeight > maxImagePixels) {
+    const pixelsScale = Math.sqrt(
+      maxImagePixels / (targetWidth * targetHeight),
+    );
+
+    targetWidth = Math.max(1, Math.floor(targetWidth * pixelsScale));
+    targetHeight = Math.max(1, Math.round(targetWidth / aspectRatio));
+  }
+
+  return {
+    width: targetWidth,
+    height: targetHeight,
+  };
+}
+
 function loadImage(sourceUrl) {
   return new Promise((resolve, reject) => {
     const image = new Image();
@@ -268,12 +423,8 @@ function loadImage(sourceUrl) {
   });
 }
 
-function getOutputMimeType(inputMimeType) {
-  if (inputMimeType === "image/png") {
-    return "image/png";
-  }
-
-  return "image/jpeg";
+function getOutputMimeTypeFromSourceUrl(sourceUrl) {
+  return sourceUrl.startsWith("data:image/png") ? "image/png" : "image/jpeg";
 }
 
 function isSupportedImageFile(file) {
@@ -283,6 +434,39 @@ function isSupportedImageFile(file) {
 
   const extension = file.name.split(".").pop()?.toLowerCase();
   return Boolean(extension && supportedExtensions.has(extension));
+}
+
+function getNextQueueEntry(avoidImageId) {
+  if (!avoidImageId) {
+    return imagePool[0];
+  }
+
+  const startIndex = avoidImageId
+    ? imagePool.findIndex((entry) => entry.id === avoidImageId)
+    : -1;
+
+  if (startIndex >= 0) {
+    for (let index = 1; index <= imagePool.length; index += 1) {
+      const candidate = imagePool[(startIndex + index) % imagePool.length];
+
+      if (candidate && candidate.id !== avoidImageId) {
+        return candidate;
+      }
+    }
+  }
+
+  return imagePool[0];
+}
+
+function moveEntryToFront(entryId) {
+  const entryIndex = imagePool.findIndex((entry) => entry.id === entryId);
+
+  if (entryIndex <= 0) {
+    return;
+  }
+
+  const [entry] = imagePool.splice(entryIndex, 1);
+  imagePool.unshift(entry);
 }
 
 async function persistImagePool() {

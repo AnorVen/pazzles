@@ -23,9 +23,10 @@ import {
 } from "./gameplay-stats.js";
 import {
   applyBoardSize,
+  buildPuzzleGeometry,
   calculateBoardSize,
-  calculatePuzzleRect,
   createNormalizedImage,
+  formatPuzzleGeometryReport,
 } from "../../infrastructure/layout/layout.js";
 import {
   getCurrentImageFitMode,
@@ -141,16 +142,15 @@ export function startPuzzle() {
   }
 
   const boardSize = calculateBoardSize();
-  const puzzleRect = calculatePuzzleRect(
-    loadedImage.naturalWidth,
-    loadedImage.naturalHeight,
+  const puzzleGeometry = buildPuzzleGeometry({
+    imageWidth: loadedImage.naturalWidth,
+    imageHeight: loadedImage.naturalHeight,
     boardSize,
-    getCurrentImageFitMode(),
-  );
-  const pieceSize = {
-    x: puzzleRect.width / cols,
-    y: puzzleRect.height / rows,
-  };
+    cols,
+    rows,
+    imageFitMode: getCurrentImageFitMode(),
+  });
+  const { puzzleRect, pieceSize } = puzzleGeometry;
   const mode = getCurrentMode();
   const modeConfig = getGameMode(mode);
 
@@ -169,7 +169,7 @@ export function startPuzzle() {
     mode,
   });
 
-  normalizedImage = createNormalizedImage(loadedImage, boardSize, puzzleRect);
+  normalizedImage = createNormalizedImage(loadedImage, puzzleGeometry);
 
   createCanvasHost();
   puzzleCanvas = createHeadbreakerCanvas(
@@ -198,8 +198,13 @@ export function startPuzzle() {
   startTimer({ timeLimitMs: modeConfig.timeLimitMs });
   startHudLoop();
   updateGameplayHud(puzzleCanvas, 0);
-  statusOutput.textContent =
-    "Партия началась. Собирайте фрагменты и следите за темпом.";
+  statusOutput.textContent = `Партия началась. ${formatPuzzleGeometryReport({
+    sourceWidth: loadedImage.naturalWidth,
+    sourceHeight: loadedImage.naturalHeight,
+    puzzleGeometry,
+    textureWidth: normalizedImage.content.width,
+    textureHeight: normalizedImage.content.height,
+  })}`;
 }
 
 export function toggleHintVisibility() {

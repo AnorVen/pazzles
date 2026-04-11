@@ -6,9 +6,13 @@ const sass = require("sass");
 const outputDirectory = path.resolve("dist-app");
 const packageOutputDirectory = path.resolve("dist");
 
-function buildProject() {
+function buildProject(options = {}) {
+  const { cleanPackageOutputDirectory = true } = options;
+
   // Очищаем результаты прошлых сборок, чтобы не копить устаревшие артефакты.
-  removeDirectory(packageOutputDirectory, { optional: true });
+  if (cleanPackageOutputDirectory) {
+    removeDirectory(packageOutputDirectory, { optional: true });
+  }
   removeDirectory(outputDirectory);
   fs.mkdirSync(outputDirectory, { recursive: true });
 

@@ -9,12 +9,17 @@ npm install
 npm start
 ```
 
-## Сборка Windows .exe
+## Сборка Windows-артефактов
 
 ```bash
 npm install
 npm run dist
 ```
+
+Команда собирает оба обязательных артефакта:
+
+- установщик `nsis`;
+- портативную версию `portable`.
 
 Готовые файлы появятся в папке `dist`.
 
@@ -25,6 +30,36 @@ npm run pack
 ```
 
 Этот вариант создаст распакованную папку приложения в `dist`.
+
+## Android-обёртка
+
+Для Android добавлена обёртка на `Capacitor`, которая упаковывает текущую веб-версию приложения в `WebView`.
+
+Подготовка веб-ресурсов для Android:
+
+```bash
+npm run build:android:web
+```
+
+Первичное создание Android-проекта:
+
+```bash
+npm run android:add
+```
+
+Синхронизация актуального веб-кода с Android-проектом:
+
+```bash
+npm run android:sync
+```
+
+Открыть Android-проект в Android Studio:
+
+```bash
+npm run android:open
+```
+
+После этого APK или AAB собираются стандартными средствами Gradle или Android Studio внутри каталога `android`.
 
 ## Сравнение с JigsawPlanet
 

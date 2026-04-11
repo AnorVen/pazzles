@@ -13,6 +13,7 @@ import {
   hintButton,
   howToPlayBackButton,
   hintOpacityInput,
+  imageAspectRatioInputs,
   imageFitModeInputs,
   leadersBackButton,
   leadersSortSelect,
@@ -35,7 +36,9 @@ import {
   poolPreviewName,
   poolSummaryOutput,
   refreshLeadersButton,
+  repreparePoolButton,
   saveSettingsButton,
+  settingsStatusOutput,
   shuffleButton,
   settingsBackButton,
   statusOutput,
@@ -58,6 +61,8 @@ import {
   clearImagePool,
   getPoolSize,
   getPoolSnapshot,
+  repreparePoolForAspectRatio,
+  reorderPoolEntries,
   restoreImagePool,
 } from "../application/game/image-pool.js";
 import { clearLeaders, exportLeaders } from "../presentation/leaders.js";
@@ -65,6 +70,7 @@ import { showPage } from "../presentation/navigation.js";
 import { refreshLeadersPage } from "../application/results/results.js";
 import {
   applyAppearanceSettings,
+  getCurrentImageAspectRatio,
   initializeSettings,
   saveSettings,
   updateModeLabel,
@@ -81,6 +87,12 @@ poolList.addEventListener("mouseover", handlePoolPreviewHover);
 poolList.addEventListener("focusin", handlePoolPreviewHover);
 poolList.addEventListener("mouseout", handlePoolPreviewLeave);
 poolList.addEventListener("focusout", handlePoolPreviewFocusLeave);
+poolList.addEventListener("dragstart", handlePoolDragStart);
+poolList.addEventListener("dragover", handlePoolDragOver);
+poolList.addEventListener("drop", handlePoolDrop);
+poolList.addEventListener("dragend", handlePoolDragEnd);
+
+let draggedPoolItemId = "";
 
 newGameButton.addEventListener("click", async () => {
   const hasPreparedImage = await ensurePreparedImage();
@@ -113,6 +125,11 @@ imageFitModeInputs.forEach((input) => {
     saveSettings();
   });
 });
+imageAspectRatioInputs.forEach((input) => {
+  input.addEventListener("change", () => {
+    saveSettings();
+  });
+});
 [
   accentColorInput,
   backgroundColorInput,
@@ -124,6 +141,45 @@ imageFitModeInputs.forEach((input) => {
   });
 });
 saveSettingsButton.addEventListener("click", saveSettings);
+repreparePoolButton.addEventListener("click", async () => {
+  const aspectRatio = getCurrentImageAspectRatio();
+
+  saveSettings();
+  repreparePoolButton.disabled = true;
+  settingsStatusOutput.textContent =
+    "Переподготавливаю пул под новый формат. Это может занять несколько секунд.";
+
+  try {
+    const { updated, fromOriginal, fallbackUpdated } =
+      await repreparePoolForAspectRatio(aspectRatio.id);
+
+    if (updated > 0) {
+      await ensurePreparedImage();
+    }
+
+    renderPoolState();
+
+    if (updated === 0) {
+      settingsStatusOutput.textContent =
+        "Пул пуст. Сначала загрузите изображения.";
+      return;
+    }
+
+    settingsStatusOutput.textContent =
+      fallbackUpdated > 0
+        ? `Пул переподготовлен: ${updated} изображений. Из исходников обновлено ${fromOriginal}, для ${fallbackUpdated} использована текущая версия без повторной загрузки.`
+        : `Пул переподготовлен: ${updated} изображений под формат ${aspectRatio.label}.`;
+    menuHint.textContent =
+      "Пул изображений обновлён под текущий формат. Следующая партия уже синхронизирована.";
+    statusOutput.textContent =
+      "Подготовленные изображения, поле и подсказка будут использовать новый формат.";
+  } catch {
+    settingsStatusOutput.textContent =
+      "Не удалось переподготовить пул под текущий формат.";
+  } finally {
+    repreparePoolButton.disabled = false;
+  }
+});
 closeModal.addEventListener("click", handleWinModalClose);
 closeLoseModalButton.addEventListener("click", () => {
   handleLoseModalClose();
@@ -157,7 +213,10 @@ openPoolButton.addEventListener("click", () => {
 });
 poolInput.addEventListener("change", async () => {
   try {
-    const { added, total, rejected } = await addImagesToPool(poolInput.files);
+    const { added, total, rejected } = await addImagesToPool(
+      poolInput.files,
+      getCurrentImageAspectRatio().id,
+    );
 
     if (total > 0) {
       await ensurePreparedImage();
@@ -253,7 +312,11 @@ function renderPoolState() {
   poolList.innerHTML = poolItems
     .map(
       (item) =>
-        `<li>
+        `<li
+          class="poolItem${item.id === draggedPoolItemId ? " poolItem--dragging" : ""}"
+          data-pool-item-id="${escapeHtml(item.id)}"
+          draggable="true"
+        >
           <button
             type="button"
             class="poolItemButton"
@@ -276,6 +339,104 @@ function escapeHtml(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;");
+}
+
+function handlePoolDragStart(event) {
+  const item = event.target.closest("[data-pool-item-id]");
+
+  if (!(item instanceof HTMLElement)) {
+    return;
+  }
+
+  draggedPoolItemId = item.dataset.poolItemId || "";
+
+  if (!draggedPoolItemId) {
+    return;
+  }
+
+  item.classList.add("poolItem--dragging");
+
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", draggedPoolItemId);
+  }
+}
+
+function handlePoolDragOver(event) {
+  const item = event.target.closest("[data-pool-item-id]");
+
+  if (!(item instanceof HTMLElement) || !draggedPoolItemId) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const bounds = item.getBoundingClientRect();
+  const targetPosition =
+    event.clientY > bounds.top + bounds.height / 2 ? "after" : "before";
+
+  poolList
+    .querySelectorAll(".poolItem--dropBefore, .poolItem--dropAfter")
+    .forEach((element) => {
+      element.classList.remove("poolItem--dropBefore", "poolItem--dropAfter");
+    });
+  item.classList.add(
+    targetPosition === "after" ? "poolItem--dropAfter" : "poolItem--dropBefore",
+  );
+}
+
+async function handlePoolDrop(event) {
+  const item = event.target.closest("[data-pool-item-id]");
+
+  if (!(item instanceof HTMLElement) || !draggedPoolItemId) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const targetImageId = item.dataset.poolItemId || "";
+  const bounds = item.getBoundingClientRect();
+  const targetPosition =
+    event.clientY > bounds.top + bounds.height / 2 ? "after" : "before";
+  const didReorder = await reorderPoolEntries(
+    draggedPoolItemId,
+    targetImageId,
+    targetPosition,
+  );
+
+  clearPoolDropMarkers();
+  draggedPoolItemId = "";
+
+  if (!didReorder) {
+    renderPoolState();
+    return;
+  }
+
+  renderPoolState();
+  restoreDefaultPoolPreview();
+  menuHint.textContent = "Очередность пула обновлена.";
+  statusOutput.textContent =
+    "Порядок изображений сохранён. Следующая партия пойдёт по новой очереди.";
+}
+
+function handlePoolDragEnd() {
+  clearPoolDropMarkers();
+  draggedPoolItemId = "";
+  renderPoolState();
+}
+
+function clearPoolDropMarkers() {
+  poolList
+    .querySelectorAll(
+      ".poolItem--dropBefore, .poolItem--dropAfter, .poolItem--dragging",
+    )
+    .forEach((element) => {
+      element.classList.remove(
+        "poolItem--dropBefore",
+        "poolItem--dropAfter",
+        "poolItem--dragging",
+      );
+    });
 }
 
 function handlePoolPreviewHover(event) {

@@ -5,6 +5,7 @@ import {
   fileName,
   gameModeInputs,
   hintOpacityInput,
+  imageAspectRatioInputs,
   imageFitModeInputs,
   piecesXInput,
   piecesYInput,
@@ -19,6 +20,10 @@ import {
   getSelectedModeId,
   setSelectedMode,
 } from "../../domain/game/game-modes.js";
+import {
+  defaultImageAspectRatioId,
+  getImageAspectRatioById,
+} from "../../domain/settings/image-aspect-ratios.js";
 
 const settingsStorageKey = "html-puzzle-settings";
 const defaultSettings = {
@@ -30,6 +35,7 @@ const defaultSettings = {
   boardColor: "#6d777b",
   hintOpacity: 0.3,
   imageFitMode: "stretch",
+  imageAspectRatio: defaultImageAspectRatioId,
 };
 
 export function initializeSettings() {
@@ -45,6 +51,10 @@ export function initializeSettings() {
   setSelectedMode(
     imageFitModeInputs,
     savedSettings.imageFitMode || defaultSettings.imageFitMode,
+  );
+  setSelectedMode(
+    imageAspectRatioInputs,
+    savedSettings.imageAspectRatio || defaultSettings.imageAspectRatio,
   );
 
   updateModeLabel();
@@ -100,6 +110,17 @@ export function getCurrentImageFitMode() {
   return getSelectedModeId(imageFitModeInputs) || defaultSettings.imageFitMode;
 }
 
+export function getCurrentImageAspectRatioId() {
+  return (
+    getSelectedModeId(imageAspectRatioInputs) ||
+    defaultSettings.imageAspectRatio
+  );
+}
+
+export function getCurrentImageAspectRatio() {
+  return getImageAspectRatioById(getCurrentImageAspectRatioId());
+}
+
 export function saveSettings() {
   const { cols, rows } = updateTotalPieces();
   const mode = updateModeLabel();
@@ -113,10 +134,12 @@ export function saveSettings() {
       mode,
       ...appearance,
       imageFitMode: getCurrentImageFitMode(),
+      imageAspectRatio: getCurrentImageAspectRatioId(),
     }),
   );
 
-  settingsStatusOutput.textContent = "Настройки сохранены.";
+  settingsStatusOutput.textContent =
+    "Настройки сохранены. Новый формат применяется к следующим загрузкам в пул.";
 }
 
 export function setSelectedFileName(name) {

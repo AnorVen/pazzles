@@ -15,6 +15,7 @@ export function createHintLayer(imageUrl) {
   hintLayer.className = "hintLayer";
   hintImage.src = imageUrl;
   hintImage.alt = "Подсказка исходной картинки";
+  hintImage.draggable = false;
   hintLayer.append(hintImage);
 
   return hintLayer;

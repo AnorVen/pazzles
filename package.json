@@ -7,10 +7,14 @@
   "private": true,
   "scripts": {
     "build": "node scripts/build.js",
+    "build:android:web": "node scripts/build-android-web.js",
     "dev": "node scripts/dev-server.js",
     "start": "npm run build && electron .",
     "dist": "npm run build && electron-builder --win --x64",
     "pack": "npm run build && electron-builder --win --x64 --dir",
+    "android:add": "npm run build:android:web && npx cap add android",
+    "android:sync": "npm run build:android:web && npx cap sync android",
+    "android:open": "npm run android:sync && npx cap open android",
     "prepare": "husky",
     "format": "prettier --write \"*.{html,js,json,md}\" \"electron/**/*.js\" \"scripts/**/*.js\" \"src/**/*.js\" \"src/**/*.scss\"",
     "format:check": "prettier --check \"*.{html,js,json,md}\" \"electron/**/*.js\" \"scripts/**/*.js\" \"src/**/*.js\" \"src/**/*.scss\"",
@@ -22,6 +26,9 @@
     "verify": "npm run format:check && npm run lint && npm audit && npm run build:check"
   },
   "devDependencies": {
+    "@capacitor/android": "^8.3.0",
+    "@capacitor/cli": "^8.3.0",
+    "@capacitor/core": "^8.3.0",
     "@eslint/js": "^10.0.1",
     "electron": "^41.2.0",
     "electron-builder": "^26.0.12",

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">HTML Puzzle</string>
+    <string name="title_activity_main">HTML Puzzle</string>
+    <string name="package_name">local.htmlpuzzle.android</string>
+    <string name="custom_url_scheme">local.htmlpuzzle.android</string>
+</resources>

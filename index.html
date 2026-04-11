@@ -75,7 +75,7 @@
             </div>
             <div class="menuStat">
               <span>Режим запуска</span>
-              <strong>Случайный выбор</strong>
+              <strong>Очередь из пула</strong>
             </div>
           </div>
 
@@ -149,6 +149,69 @@
                       max="5000"
                       value="3"
                     />
+                  </label>
+                </div>
+
+                <div class="modeSection">
+                  <div class="sectionLabel">Формат картинки и поля</div>
+
+                  <label class="modeCard">
+                    <input
+                      type="radio"
+                      name="imageAspectRatio"
+                      value="16:9"
+                      checked
+                    />
+                    <span class="modeCardBody">
+                      <strong>16:9</strong>
+                      <small>
+                        Широкий формат. При загрузке картинка обрезается под
+                        этот кадр, а поле и подсказка строятся по нему же.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
+                    <input type="radio" name="imageAspectRatio" value="4:3" />
+                    <span class="modeCardBody">
+                      <strong>4:3</strong>
+                      <small>
+                        Более классический горизонтальный формат для спокойных
+                        кадров.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
+                    <input type="radio" name="imageAspectRatio" value="1:1" />
+                    <span class="modeCardBody">
+                      <strong>1:1</strong>
+                      <small>
+                        Квадратный формат для симметричного поля и компактной
+                        композиции.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
+                    <input type="radio" name="imageAspectRatio" value="3:4" />
+                    <span class="modeCardBody">
+                      <strong>3:4</strong>
+                      <small>
+                        Вертикальный формат для портретных и узких изображений.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
+                    <input type="radio" name="imageAspectRatio" value="9:16" />
+                    <span class="modeCardBody">
+                      <strong>9:16</strong>
+                      <small>
+                        Высокий мобильный формат. Поле и подсказка будут такими
+                        же вытянутыми.
+                      </small>
+                    </span>
                   </label>
                 </div>
 
@@ -286,6 +349,13 @@
                 type="button"
               >
                 Сохранить настройки
+              </button>
+              <button
+                id="repreparePoolButton"
+                class="secondaryButton"
+                type="button"
+              >
+                Переподготовить пул
               </button>
             </div>
 

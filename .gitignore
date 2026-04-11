@@ -2,8 +2,14 @@ node_modules/
 dist/
 dist-*/
 dist-app/
+android-web/
 .build-checks/
 *.log
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/captures/
 
 # IDE и редакторы
 .idea/

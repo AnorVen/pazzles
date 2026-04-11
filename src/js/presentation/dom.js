@@ -42,9 +42,15 @@ export const gameModeInputs = document.querySelectorAll(
 export const imageFitModeInputs = document.querySelectorAll(
   'input[name="imageFitMode"]',
 );
+export const imageAspectRatioInputs = document.querySelectorAll(
+  'input[name="imageAspectRatio"]',
+);
 export const totalPiecesOutput = document.querySelector("#totalPieces");
 export const selectedModeLabel = document.querySelector("#selectedModeLabel");
 export const saveSettingsButton = document.querySelector("#saveSettingsButton");
+export const repreparePoolButton = document.querySelector(
+  "#repreparePoolButton",
+);
 export const settingsStatusOutput = document.querySelector("#settingsStatus");
 
 export const leadersBackButton = document.querySelector("#leadersBackButton");

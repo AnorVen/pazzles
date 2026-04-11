@@ -297,6 +297,39 @@ button {
   min-height: 100%;
 }
 
+.poolItem {
+  position: relative;
+  padding-left: 0 !important;
+
+  &::before {
+    display: none;
+  }
+
+  &.poolItem--dragging {
+    opacity: 0.42;
+  }
+
+  &.poolItem--dropBefore::after,
+  &.poolItem--dropAfter::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    border-radius: 999px;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent);
+  }
+
+  &.poolItem--dropBefore::after {
+    top: -6px;
+  }
+
+  &.poolItem--dropAfter::after {
+    bottom: -6px;
+  }
+}
+
 .poolItemButton {
   width: 100%;
   min-height: auto;
@@ -304,7 +337,7 @@ button {
   border-radius: 8px;
   background: rgba(223, 234, 236, 0.05);
   color: #d9e6e8;
-  cursor: pointer;
+  cursor: grab;
   padding: 12px 14px;
   text-align: left;
   font-weight: 600;
@@ -319,6 +352,10 @@ button {
     background: rgba(223, 234, 236, 0.1);
     transform: translateY(-1px);
     outline: none;
+  }
+
+  &:active {
+    cursor: grabbing;
   }
 }
 
@@ -720,6 +757,22 @@ button {
   &.showHint .hintLayer {
     opacity: var(--hint-opacity);
   }
+
+  &::before {
+    content: "";
+    position: absolute;
+    left: var(--puzzle-left, 0);
+    top: var(--puzzle-top, 0);
+    width: var(--puzzle-width, 0);
+    height: var(--puzzle-height, 0);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.04);
+    box-shadow:
+      inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+      0 18px 36px rgba(0, 0, 0, 0.12);
+    pointer-events: none;
+    z-index: 0;
+  }
 }
 
 .hintLayer {
@@ -728,14 +781,18 @@ button {
   top: var(--puzzle-top, 0);
   width: var(--puzzle-width, 100%);
   height: var(--puzzle-height, 100%);
+  display: grid;
+  place-items: center;
   pointer-events: none;
   opacity: 0;
   z-index: 0;
 
   img {
+    display: block;
     width: 100%;
     height: 100%;
     object-fit: contain;
+    object-position: center;
   }
 }
 

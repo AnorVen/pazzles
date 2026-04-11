@@ -51,7 +51,6 @@ export function configurePuzzleCanvas(
   puzzleCanvas.autogenerateWithManufacturer(
     createPuzzleManufacturer(cols, rows, startAnchor),
   );
-  puzzleCanvas.adjustImagesToPuzzleWidth();
   puzzleCanvas.refill();
   disableImageRepeat(puzzleCanvas);
   puzzleCanvas.puzzle.attachHorizontalConnectionRequirement(

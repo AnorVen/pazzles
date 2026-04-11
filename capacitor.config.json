@@ -1,0 +1,6 @@
+{
+  "appId": "local.htmlpuzzle.android",
+  "appName": "HTML Puzzle",
+  "webDir": "android-web",
+  "bundledWebRuntime": false
+}

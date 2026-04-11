@@ -22,7 +22,6 @@ const result = spawnSync(
     "electron-builder",
     "--win",
     "--x64",
-    "--dir",
     `--config.directories.output=${outputDirectory}`,
   ],
   {
@@ -31,8 +30,36 @@ const result = spawnSync(
   },
 );
 
-if (result.status === 0) {
-  fs.rmSync(outputDirectory, { recursive: true, force: true });
+if (result.status !== 0) {
+  process.exit(result.status ?? 1);
 }
 
-process.exit(result.status ?? 1);
+const generatedEntries = fs.readdirSync(outputDirectory, {
+  withFileTypes: true,
+});
+const generatedFiles = generatedEntries
+  .filter((entry) => entry.isFile())
+  .map((entry) => entry.name);
+
+// Проверяем, что сборка действительно выпустила и установщик, и portable-версию.
+const installerArtifact = generatedFiles.find(
+  (fileName) => fileName.endsWith(".exe") && fileName.includes("Setup"),
+);
+const portableArtifact = generatedFiles.find(
+  (fileName) =>
+    fileName.endsWith(".exe") &&
+    !fileName.includes("Setup") &&
+    !fileName.includes("unpacked"),
+);
+
+if (!installerArtifact || !portableArtifact) {
+  console.error("Не найдены оба обязательных артефакта сборки.");
+  console.error(
+    `Файлы в ${outputDirectory}: ${generatedFiles.join(", ") || "нет файлов"}`,
+  );
+  process.exit(1);
+}
+
+fs.rmSync(outputDirectory, { recursive: true, force: true });
+
+process.exit(0);
