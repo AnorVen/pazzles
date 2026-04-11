@@ -46,7 +46,7 @@ export function formatTime(milliseconds) {
 
 function renderTimer() {
   const value =
-    activeTimeLimitMs === null ? getElapsedTime() : getRemainingTime() ?? 0;
+    activeTimeLimitMs === null ? getElapsedTime() : (getRemainingTime() ?? 0);
 
   timerOutput.textContent = formatTime(value);
 }

@@ -388,8 +388,7 @@ function handleTimeLimitReached(timeLimitMs) {
   loseMessage.textContent =
     "Лимит режима «Испытание» исчерпан. Текущая партия остановлена, можно вернуться в меню и начать заново.";
   loseModal.hidden = false;
-  statusOutput.textContent =
-    `Время вышло на отметке ${formatTime(timeLimitMs)}. Партия остановлена до нового запуска.`;
+  statusOutput.textContent = `Время вышло на отметке ${formatTime(timeLimitMs)}. Партия остановлена до нового запуска.`;
 }
 
 async function prepareNextImageFromPool(previousImageId) {
@@ -481,8 +480,10 @@ function buildOrderedPosition(piece) {
     return targetPosition;
   }
 
-  const colShift = (piece.metadata.col % 2 === 0 ? -1 : 1) * currentPieceSize.x * 0.22;
-  const rowShift = (piece.metadata.row % 2 === 0 ? -1 : 1) * currentPieceSize.y * 0.22;
+  const colShift =
+    (piece.metadata.col % 2 === 0 ? -1 : 1) * currentPieceSize.x * 0.22;
+  const rowShift =
+    (piece.metadata.row % 2 === 0 ? -1 : 1) * currentPieceSize.y * 0.22;
   const minX = currentPuzzleRect.left + currentPieceSize.x / 2;
   const maxX =
     currentPuzzleRect.left + currentPuzzleRect.width - currentPieceSize.x / 2;

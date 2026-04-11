@@ -70,13 +70,7 @@ export function createNormalizedImage(sourceImage, boardSize, puzzleRect) {
   canvas.width = Math.max(1, Math.round(puzzleRect.width));
   canvas.height = Math.max(1, Math.round(puzzleRect.height));
   context.clearRect(0, 0, canvas.width, canvas.height);
-  context.drawImage(
-    sourceImage,
-    0,
-    0,
-    canvas.width,
-    canvas.height,
-  );
+  context.drawImage(sourceImage, 0, 0, canvas.width, canvas.height);
 
   return {
     content: canvas,

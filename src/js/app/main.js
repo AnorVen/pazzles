@@ -288,8 +288,7 @@ function handlePoolPreviewHover(event) {
   showPoolPreview({
     src: trigger.dataset.previewSrc || "",
     name: trigger.dataset.previewName || "Превью изображения",
-    isPrepared:
-      (trigger.dataset.previewState || "").includes("подготовлена"),
+    isPrepared: (trigger.dataset.previewState || "").includes("подготовлена"),
   });
   poolPreviewMeta.textContent =
     trigger.dataset.previewState || "Изображение лежит в общем пуле.";
