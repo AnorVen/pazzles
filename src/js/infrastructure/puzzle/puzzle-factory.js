@@ -16,10 +16,10 @@ export function createPuzzleManufacturer(cols, rows, startAnchor) {
 export function createPuzzleOutline() {
   if (headbreaker.outline && headbreaker.outline.Rounded) {
     return new headbreaker.outline.Rounded({
-      borderLength: 0.3,
-      insertDepth: 0.72,
+      borderLength: 0.24,
+      insertDepth: 0.9,
       bezelize: true,
-      bezelDepth: 0.08,
+      bezelDepth: 0.18,
     });
   }
 

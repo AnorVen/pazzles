@@ -11,6 +11,8 @@
   --accent: #34c3a1;
   --accent-strong: #20a488;
   --accent-soft: rgba(52, 195, 161, 0.14);
+  --board-base: #6d777b;
+  --hint-opacity: 0.3;
   --warning: #f2bc66;
   --shadow: 0 24px 80px rgba(0, 0, 0, 0.38);
 }
@@ -27,11 +29,7 @@ body {
   margin: 0;
   min-height: 100vh;
   background:
-    radial-gradient(
-      circle at top left,
-      rgba(52, 195, 161, 0.12),
-      transparent 24%
-    ),
+    radial-gradient(circle at top left, var(--accent-soft), transparent 24%),
     radial-gradient(
       circle at bottom right,
       rgba(242, 188, 102, 0.08),
@@ -92,14 +90,6 @@ button {
 
 .ghostButton {
   min-width: 96px;
-}
-
-#imageInput {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
 }
 
 .shell,
@@ -282,6 +272,87 @@ button {
   margin: 18px 0 0;
 }
 
+.menuPoolPanel {
+  margin-top: 24px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel-alt);
+  padding: 20px 22px;
+}
+
+.menuPoolHeader {
+  display: grid;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.menuPoolLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 18px;
+  align-items: start;
+}
+
+.menuFeatureList--pool {
+  min-height: 100%;
+}
+
+.poolItemButton {
+  width: 100%;
+  min-height: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(223, 234, 236, 0.05);
+  color: #d9e6e8;
+  cursor: pointer;
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    transform 120ms ease;
+
+  &:hover,
+  &:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    background: rgba(223, 234, 236, 0.1);
+    transform: translateY(-1px);
+    outline: none;
+  }
+}
+
+.poolPreview {
+  display: grid;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(223, 234, 236, 0.05);
+  padding: 14px;
+}
+
+.poolPreviewFrame {
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    var(--bg-deep);
+  background-size:
+    18px 18px,
+    18px 18px,
+    auto;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
 .contentPage {
   min-height: 100vh;
   padding: 28px;
@@ -384,6 +455,10 @@ button {
   margin-top: 18px;
 }
 
+.fieldGrid--colors {
+  grid-template-columns: repeat(2, minmax(180px, 1fr));
+}
+
 .field {
   display: grid;
   gap: 6px;
@@ -396,6 +471,14 @@ button {
     background: rgba(255, 255, 255, 0.04);
     color: var(--ink);
     padding: 10px 12px;
+  }
+
+  input[type="color"] {
+    padding: 6px;
+  }
+
+  input[type="range"] {
+    padding: 10px 0;
   }
 }
 
@@ -415,13 +498,14 @@ button {
   }
 
   input:checked + .modeCardBody {
-    border-color: rgba(52, 195, 161, 0.55);
+    border-color: color-mix(in srgb, var(--accent) 55%, transparent);
     background: linear-gradient(
       180deg,
-      rgba(52, 195, 161, 0.18),
-      rgba(52, 195, 161, 0.08)
+      color-mix(in srgb, var(--accent) 18%, transparent),
+      color-mix(in srgb, var(--accent) 8%, transparent)
     );
-    box-shadow: inset 0 0 0 1px rgba(52, 195, 161, 0.16);
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--accent) 16%, transparent);
   }
 }
 
@@ -561,7 +645,11 @@ button {
 
 .hudCard--accent {
   background:
-    linear-gradient(180deg, rgba(52, 195, 161, 0.2), rgba(52, 195, 161, 0.08)),
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--accent) 20%, transparent),
+      color-mix(in srgb, var(--accent) 8%, transparent)
+    ),
     var(--panel-alt);
 }
 
@@ -619,7 +707,8 @@ button {
   background:
     linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), #6d777b;
+    linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent),
+    var(--board-base);
   background-size:
     24px 24px,
     24px 24px,
@@ -629,7 +718,7 @@ button {
   user-select: none;
 
   &.showHint .hintLayer {
-    opacity: 0.3;
+    opacity: var(--hint-opacity);
   }
 }
 
@@ -730,7 +819,8 @@ button {
   .settingsColumns,
   .gameStage,
   .menuHero,
-  .infoGrid {
+  .infoGrid,
+  .menuPoolLayout {
     grid-template-columns: 1fr;
   }
 

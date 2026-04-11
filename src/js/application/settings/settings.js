@@ -1,6 +1,11 @@
 import {
+  accentColorInput,
+  backgroundColorInput,
+  boardColorInput,
   fileName,
   gameModeInputs,
+  hintOpacityInput,
+  imageFitModeInputs,
   piecesXInput,
   piecesYInput,
   selectedModeLabel,
@@ -16,18 +21,35 @@ import {
 } from "../../domain/game/game-modes.js";
 
 const settingsStorageKey = "html-puzzle-settings";
+const defaultSettings = {
+  cols: 4,
+  rows: 3,
+  mode: "calm",
+  accentColor: "#34c3a1",
+  backgroundColor: "#11181c",
+  boardColor: "#6d777b",
+  hintOpacity: 0.3,
+  imageFitMode: "stretch",
+};
 
 export function initializeSettings() {
   const savedSettings = readSavedSettings();
 
-  if (savedSettings) {
-    piecesXInput.value = String(savedSettings.cols);
-    piecesYInput.value = String(savedSettings.rows);
-    setSelectedMode(gameModeInputs, savedSettings.mode || "calm");
-  }
+  piecesXInput.value = String(savedSettings.cols);
+  piecesYInput.value = String(savedSettings.rows);
+  accentColorInput.value = savedSettings.accentColor;
+  backgroundColorInput.value = savedSettings.backgroundColor;
+  boardColorInput.value = savedSettings.boardColor;
+  hintOpacityInput.value = String(savedSettings.hintOpacity);
+  setSelectedMode(gameModeInputs, savedSettings.mode || "calm");
+  setSelectedMode(
+    imageFitModeInputs,
+    savedSettings.imageFitMode || defaultSettings.imageFitMode,
+  );
 
   updateModeLabel();
   updateTotalPieces();
+  applyAppearanceSettings();
 }
 
 export function updateTotalPieces(changedInput, pairedInput) {
@@ -74,9 +96,14 @@ export function getCurrentMode() {
   return getSelectedModeId(gameModeInputs);
 }
 
+export function getCurrentImageFitMode() {
+  return getSelectedModeId(imageFitModeInputs) || defaultSettings.imageFitMode;
+}
+
 export function saveSettings() {
   const { cols, rows } = updateTotalPieces();
   const mode = updateModeLabel();
+  const appearance = getAppearanceSettings();
 
   localStorage.setItem(
     settingsStorageKey,
@@ -84,6 +111,8 @@ export function saveSettings() {
       cols,
       rows,
       mode,
+      ...appearance,
+      imageFitMode: getCurrentImageFitMode(),
     }),
   );
 
@@ -99,11 +128,94 @@ function readSavedSettings() {
     const rawValue = localStorage.getItem(settingsStorageKey);
 
     if (!rawValue) {
-      return null;
+      return { ...defaultSettings };
     }
 
-    return JSON.parse(rawValue);
+    return {
+      ...defaultSettings,
+      ...JSON.parse(rawValue),
+    };
   } catch {
-    return null;
+    return { ...defaultSettings };
   }
+}
+
+export function applyAppearanceSettings() {
+  const appearance = getAppearanceSettings();
+  const root = document.documentElement;
+
+  root.style.setProperty("--accent", appearance.accentColor);
+  root.style.setProperty(
+    "--accent-strong",
+    darkenColor(appearance.accentColor, 0.18),
+  );
+  root.style.setProperty("--accent-soft", toRgba(appearance.accentColor, 0.14));
+  root.style.setProperty("--bg", appearance.backgroundColor);
+  root.style.setProperty(
+    "--bg-deep",
+    darkenColor(appearance.backgroundColor, 0.28),
+  );
+  root.style.setProperty("--board-base", appearance.boardColor);
+  root.style.setProperty("--hint-opacity", String(appearance.hintOpacity));
+}
+
+export function getAppearanceSettings() {
+  return {
+    accentColor: accentColorInput.value,
+    backgroundColor: backgroundColorInput.value,
+    boardColor: boardColorInput.value,
+    hintOpacity: normalizeHintOpacity(hintOpacityInput.value),
+  };
+}
+
+function normalizeHintOpacity(value) {
+  const numericValue = Number.parseFloat(value);
+
+  if (Number.isNaN(numericValue)) {
+    return defaultSettings.hintOpacity;
+  }
+
+  return Math.min(0.8, Math.max(0, numericValue));
+}
+
+function darkenColor(hexColor, amount) {
+  const { r, g, b } = parseHexColor(hexColor);
+
+  return toHexColor({
+    r: r * (1 - amount),
+    g: g * (1 - amount),
+    b: b * (1 - amount),
+  });
+}
+
+function toRgba(hexColor, alpha) {
+  const { r, g, b } = parseHexColor(hexColor);
+
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+function parseHexColor(hexColor) {
+  const normalizedColor = hexColor.replace("#", "");
+  const expandedColor =
+    normalizedColor.length === 3
+      ? normalizedColor
+          .split("")
+          .map((char) => `${char}${char}`)
+          .join("")
+      : normalizedColor;
+  const numericValue = Number.parseInt(expandedColor, 16);
+
+  return {
+    r: (numericValue >> 16) & 255,
+    g: (numericValue >> 8) & 255,
+    b: numericValue & 255,
+  };
+}
+
+function toHexColor({ r, g, b }) {
+  const parts = [r, g, b].map((value) =>
+    Math.round(value).toString(16).padStart(2, "0"),
+  );
+
+  return `#${parts.join("")}`;
 }

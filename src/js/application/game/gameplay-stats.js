@@ -98,6 +98,15 @@ export function buildWinPayload({ elapsedMs, elapsedLabel, fileName }) {
   };
 }
 
+export function completeGameplayHud(elapsedMs) {
+  renderHud({
+    progressPercent: 100,
+    placedPieces: session.totalPieces,
+    groups: session.totalPieces > 0 ? 1 : 0,
+    score: calculateScore(elapsedMs),
+  });
+}
+
 function renderModeInfo() {
   const mode = getGameMode(session.mode);
 

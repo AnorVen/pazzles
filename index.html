@@ -19,26 +19,26 @@
               <p class="eyebrow">HTML Puzzle</p>
               <h1>Тихая мастерская для красивых и сложных пазлов</h1>
               <p class="heroText">
-                Загружайте свои снимки, выбирайте темп игры и собирайте пазл в
-                спокойном режиме или в соревновательном испытании.
+                Сначала загрузите группу картинок, затем запускайте партии по
+                одной. После каждой победы приложение подготовит следующий кадр
+                автоматически.
               </p>
             </div>
 
             <div class="menuPreviewCard">
-              <span class="previewLabel">Ритм игры</span>
-              <strong>Спокойно, красиво, с памятью о лучших партиях</strong>
+              <span class="previewLabel">Работа с пулом</span>
+              <strong>Один набор изображений, несколько партий подряд</strong>
               <ul class="menuFeatureList">
-                <li>Свой снимок и гибкая сетка деталей</li>
-                <li>Подсказка, прогресс и текущий счёт</li>
-                <li>Локальная таблица лидеров и экспорт CSV</li>
+                <li>Загрузка сразу нескольких изображений</li>
+                <li>Случайный выбор картинки перед стартом</li>
+                <li>Автоматическая подготовка следующей партии после победы</li>
               </ul>
             </div>
           </div>
 
           <div class="menuActions">
-            <button id="newGameButton" type="button">Новая игра</button>
+            <button id="newGameButton" type="button">Начать</button>
             <button id="openSettingsButton" type="button">Настройки</button>
-            <button id="openLeadersButton" type="button">Лидеры</button>
             <button
               id="openHowToPlayButton"
               class="secondaryButton"
@@ -46,31 +46,68 @@
             >
               Как играть
             </button>
-            <button id="openAboutButton" class="secondaryButton" type="button">
-              О проекте
+            <button id="openPoolButton" class="secondaryButton" type="button">
+              Загрузить группу картинок
+            </button>
+            <button id="clearPoolButton" class="secondaryButton" type="button">
+              Удалить все
             </button>
             <button id="exitButton" class="secondaryButton" type="button">
               Выход
             </button>
+            <input
+              id="poolInput"
+              type="file"
+              accept=".jpg,.jpeg,.png,.webp,.bmp,image/jpeg,image/png,image/webp,image/bmp"
+              multiple
+              hidden
+            />
           </div>
 
           <div class="menuStats">
             <div class="menuStat">
-              <span>Режимы</span>
-              <strong>2</strong>
+              <span>Картинок в пуле</span>
+              <strong id="poolCount">0</strong>
             </div>
             <div class="menuStat">
-              <span>Максимум деталей</span>
-              <strong>5000</strong>
+              <span>Следующая партия</span>
+              <strong id="menuSelectedImage">Не выбрана</strong>
             </div>
             <div class="menuStat">
-              <span>Локальная база</span>
-              <strong>SQLite</strong>
+              <span>Режим запуска</span>
+              <strong>Случайный выбор</strong>
+            </div>
+          </div>
+
+          <div class="menuPoolPanel">
+            <div class="menuPoolHeader">
+              <span class="sectionLabel">Состав пула</span>
+              <strong id="poolSummary"
+                >Добавьте изображения для первой партии.</strong
+              >
+            </div>
+            <div class="menuPoolLayout">
+              <ul id="poolList" class="menuFeatureList menuFeatureList--pool">
+                <li>Пул пока пуст.</li>
+              </ul>
+
+              <div
+                id="poolPreview"
+                class="poolPreview"
+                aria-live="polite"
+                hidden
+              >
+                <div class="poolPreviewFrame">
+                  <img id="poolPreviewImage" alt="" />
+                </div>
+                <strong id="poolPreviewName">Превью изображения</strong>
+                <span id="poolPreviewMeta">Наведите на элемент списка.</span>
+              </div>
             </div>
           </div>
 
           <p id="menuHint" class="menuHint">
-            Выберите картинку и настройте размер пазла перед стартом.
+            Сначала загрузите группу картинок, затем запускайте первую партию.
           </p>
         </div>
       </section>
@@ -90,16 +127,7 @@
           <div class="settingsPanel">
             <div class="settingsColumns">
               <div class="settingsBlock">
-                <div class="upload">
-                  <label class="fileButton" for="imageInput"
-                    >Загрузить картинку</label
-                  >
-                  <input id="imageInput" type="file" accept="image/*" />
-                  <span id="fileName" class="fileName"
-                    >Картинка не выбрана</span
-                  >
-                </div>
-
+                <div class="sectionLabel">Параметры поля</div>
                 <div class="fieldGrid">
                   <label class="field">
                     <span>Кусочков по X</span>
@@ -123,11 +151,52 @@
                     />
                   </label>
                 </div>
+
+                <div class="modeSection">
+                  <div class="sectionLabel">Подгонка изображения</div>
+
+                  <label class="modeCard">
+                    <input
+                      type="radio"
+                      name="imageFitMode"
+                      value="stretch"
+                      checked
+                    />
+                    <span class="modeCardBody">
+                      <strong>Растянуть</strong>
+                      <small>
+                        Картинка занимает весь прямоугольник пазла без пустых
+                        полей.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
+                    <input type="radio" name="imageFitMode" value="contain" />
+                    <span class="modeCardBody">
+                      <strong>Сохранить пропорции</strong>
+                      <small>
+                        Картинка вписывается целиком, но может оставлять
+                        внутренние поля.
+                      </small>
+                    </span>
+                  </label>
+                </div>
               </div>
 
               <div class="settingsBlock">
                 <div class="modeSection">
                   <div class="sectionLabel">Режим партии</div>
+
+                  <label class="modeCard">
+                    <input type="radio" name="gameMode" value="easy" />
+                    <span class="modeCardBody">
+                      <strong>Лёгкий</strong>
+                      <small>
+                        Подсказки бесплатны, а итоговый счёт считается мягче.
+                      </small>
+                    </span>
+                  </label>
 
                   <label class="modeCard">
                     <input type="radio" name="gameMode" value="calm" checked />
@@ -140,13 +209,55 @@
                   </label>
 
                   <label class="modeCard">
+                    <input type="radio" name="gameMode" value="classic" />
+                    <span class="modeCardBody">
+                      <strong>Классический</strong>
+                      <small>
+                        Сбалансированный режим с более заметным влиянием помощи.
+                      </small>
+                    </span>
+                  </label>
+
+                  <label class="modeCard">
                     <input type="radio" name="gameMode" value="challenge" />
                     <span class="modeCardBody">
                       <strong>Испытание</strong>
                       <small>
-                        Больше очков за сложность, но помощь стоит дороже.
+                        Подсказки отключены, а на сборку даётся ограниченное время.
                       </small>
                     </span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="settingsBlock">
+                <div class="sectionLabel">Оформление</div>
+                <div class="fieldGrid fieldGrid--colors">
+                  <label class="field">
+                    <span>Акцент интерфейса</span>
+                    <input id="accentColor" type="color" value="#34c3a1" />
+                  </label>
+
+                  <label class="field">
+                    <span>Фон приложения</span>
+                    <input id="backgroundColor" type="color" value="#11181c" />
+                  </label>
+
+                  <label class="field">
+                    <span>Цвет поля</span>
+                    <input id="boardColor" type="color" value="#6d777b" />
+                  </label>
+
+                  <label class="field">
+                    <span>Прозрачность подсказки</span>
+                    <input
+                      id="hintOpacity"
+                      type="range"
+                      min="0"
+                      max="0.8"
+                      step="0.05"
+                      value="0.3"
+                    />
                   </label>
                 </div>
               </div>
@@ -158,12 +269,12 @@
                 <strong id="totalPieces">12</strong>
               </div>
               <div class="metaItem">
-                <span>Стиль партии</span>
+                <span>Режим партии</span>
                 <strong id="selectedModeLabel">Спокойный</strong>
               </div>
               <div class="metaItem">
-                <span>Подсказка</span>
-                <strong>По кнопке во время игры</strong>
+                <span>Подготовленная картинка</span>
+                <strong id="fileName">Не выбрана</strong>
               </div>
             </div>
 
@@ -175,7 +286,6 @@
               >
                 Сохранить настройки
               </button>
-              <button id="startButton" type="button">Начать игру</button>
             </div>
 
             <div id="settingsStatus" class="status" aria-live="polite"></div>
@@ -282,58 +392,6 @@
                   Откройте настройки, загрузите картинку и начните партию.
                 </p>
               </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section id="aboutPage" class="page" aria-label="О проекте" hidden>
-        <div class="contentPage">
-          <header class="pageHeader">
-            <button id="aboutBackButton" class="ghostButton" type="button">
-              Назад
-            </button>
-            <div>
-              <p class="eyebrow">О проекте</p>
-              <h2 id="aboutTitle">Зачем нужен этот пазл</h2>
-            </div>
-          </header>
-
-          <div class="infoPanel">
-            <p id="aboutLead" class="infoLead">
-              Краткое описание идеи приложения и его атмосферы.
-            </p>
-
-            <div class="infoGrid infoGrid--twoColumns">
-              <article class="infoCard">
-                <span class="sectionLabel">Идея</span>
-                <p id="aboutIdea" class="heroText">
-                  Приложение соединяет спокойную сборку и локальную историю
-                  результатов.
-                </p>
-              </article>
-
-              <article class="infoCard">
-                <span class="sectionLabel">Для кого</span>
-                <p id="aboutAudience" class="heroText">
-                  Для игроков, которым нравится собственный темп и аккуратный
-                  интерфейс.
-                </p>
-              </article>
-
-              <article class="infoCard">
-                <span class="sectionLabel">Особенности</span>
-                <ul id="aboutHighlights" class="menuFeatureList">
-                  <li>Загрузка своих изображений</li>
-                </ul>
-              </article>
-
-              <article class="infoCard">
-                <span class="sectionLabel">Обещание</span>
-                <p id="aboutPromise" class="heroText">
-                  Пазл остаётся понятным, но даёт простор для сложных партий.
-                </p>
-              </article>
             </div>
           </div>
         </div>
@@ -495,6 +553,28 @@
           </button>
           <button id="openLeadersFromModal" type="button">
             Открыть лидеров
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div id="loseModal" class="modal" hidden>
+      <div
+        class="modalPanel modalPanel--win"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="loseTitle"
+      >
+        <p class="eyebrow">Партия остановлена</p>
+        <h2 id="loseTitle">Время вышло</h2>
+
+        <p id="loseMessage" class="winMessage">
+          Лимит режима исчерпан. Вернитесь в меню и запустите новую партию.
+        </p>
+
+        <div class="modalActions">
+          <button id="closeLoseModal" class="secondaryButton" type="button">
+            В меню
           </button>
         </div>
       </div>

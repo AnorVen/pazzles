@@ -2,36 +2,49 @@ export const menuPage = document.querySelector("#menuPage");
 export const settingsPage = document.querySelector("#settingsPage");
 export const leadersPage = document.querySelector("#leadersPage");
 export const howToPlayPage = document.querySelector("#howToPlayPage");
-export const aboutPage = document.querySelector("#aboutPage");
 export const gamePage = document.querySelector("#gamePage");
 
 export const newGameButton = document.querySelector("#newGameButton");
 export const openSettingsButton = document.querySelector("#openSettingsButton");
-export const openLeadersButton = document.querySelector("#openLeadersButton");
 export const openHowToPlayButton = document.querySelector(
   "#openHowToPlayButton",
 );
-export const openAboutButton = document.querySelector("#openAboutButton");
+export const openPoolButton = document.querySelector("#openPoolButton");
+export const clearPoolButton = document.querySelector("#clearPoolButton");
+export const poolInput = document.querySelector("#poolInput");
+export const poolCountOutput = document.querySelector("#poolCount");
+export const poolSummaryOutput = document.querySelector("#poolSummary");
+export const menuSelectedImageOutput =
+  document.querySelector("#menuSelectedImage");
+export const poolList = document.querySelector("#poolList");
+export const poolPreview = document.querySelector("#poolPreview");
+export const poolPreviewImage = document.querySelector("#poolPreviewImage");
+export const poolPreviewName = document.querySelector("#poolPreviewName");
+export const poolPreviewMeta = document.querySelector("#poolPreviewMeta");
 export const exitButton = document.querySelector("#exitButton");
 export const menuHint = document.querySelector("#menuHint");
 
 export const howToPlayBackButton = document.querySelector(
   "#howToPlayBackButton",
 );
-export const aboutBackButton = document.querySelector("#aboutBackButton");
 
 export const settingsBackButton = document.querySelector("#settingsBackButton");
-export const imageInput = document.querySelector("#imageInput");
 export const fileName = document.querySelector("#fileName");
 export const piecesXInput = document.querySelector("#piecesX");
 export const piecesYInput = document.querySelector("#piecesY");
+export const accentColorInput = document.querySelector("#accentColor");
+export const backgroundColorInput = document.querySelector("#backgroundColor");
+export const boardColorInput = document.querySelector("#boardColor");
+export const hintOpacityInput = document.querySelector("#hintOpacity");
 export const gameModeInputs = document.querySelectorAll(
   'input[name="gameMode"]',
+);
+export const imageFitModeInputs = document.querySelectorAll(
+  'input[name="imageFitMode"]',
 );
 export const totalPiecesOutput = document.querySelector("#totalPieces");
 export const selectedModeLabel = document.querySelector("#selectedModeLabel");
 export const saveSettingsButton = document.querySelector("#saveSettingsButton");
-export const startButton = document.querySelector("#startButton");
 export const settingsStatusOutput = document.querySelector("#settingsStatus");
 
 export const leadersBackButton = document.querySelector("#leadersBackButton");
@@ -75,3 +88,6 @@ export const closeModal = document.querySelector("#closeModal");
 export const openLeadersFromModalButton = document.querySelector(
   "#openLeadersFromModal",
 );
+export const loseModal = document.querySelector("#loseModal");
+export const loseMessage = document.querySelector("#loseMessage");
+export const closeLoseModalButton = document.querySelector("#closeLoseModal");

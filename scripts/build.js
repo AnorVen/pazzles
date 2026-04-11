@@ -4,9 +4,12 @@ const path = require("node:path");
 const sass = require("sass");
 
 const outputDirectory = path.resolve("dist-app");
+const packageOutputDirectory = path.resolve("dist");
 
 function buildProject() {
-  fs.rmSync(outputDirectory, { recursive: true, force: true });
+  // Очищаем результаты прошлых сборок, чтобы не копить устаревшие артефакты.
+  removeDirectory(packageOutputDirectory, { optional: true });
+  removeDirectory(outputDirectory);
   fs.mkdirSync(outputDirectory, { recursive: true });
 
   const styles = sass.compile(path.resolve("src/scss/styles.scss"), {
@@ -39,4 +42,26 @@ function copySqlJsWasm() {
   const targetPath = path.join(outputDirectory, "sql-wasm.wasm");
 
   fs.copyFileSync(sourcePath, targetPath);
+}
+
+function removeDirectory(targetDirectory, options = {}) {
+  const { optional = false } = options;
+
+  try {
+    fs.rmSync(targetDirectory, {
+      recursive: true,
+      force: true,
+      maxRetries: 5,
+      retryDelay: 200,
+    });
+  } catch (error) {
+    if (optional) {
+      console.warn(
+        `Не удалось очистить ${path.basename(targetDirectory)}: ${error.message}`,
+      );
+      return;
+    }
+
+    throw error;
+  }
 }

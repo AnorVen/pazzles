@@ -1,5 +1,4 @@
 import {
-  aboutPage,
   gamePage,
   howToPlayPage,
   leadersPage,
@@ -12,7 +11,6 @@ const pages = {
   settings: settingsPage,
   leaders: leadersPage,
   howToPlay: howToPlayPage,
-  about: aboutPage,
   game: gamePage,
 };
 
